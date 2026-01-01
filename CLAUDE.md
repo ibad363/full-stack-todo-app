@@ -1,8 +1,86 @@
+# Full-Stack Todo App Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-01-01
+
+## Active Technologies
+
+- Python 3.11+ + TypeScript 5.0+ (001-task-crud)
+- Node.js 20+ (001-task-crud)
+- FastAPI 0.104+ + SQLModel 0.0.14+ + Pydantic 2.5+ (001-task-crud)
+- Next.js 16+ + React 18+ (001-task-crud)
+- Better Auth (001-task-crud)
+- Neon Serverless PostgreSQL (001-task-crud)
+- Alembic (for migrations) (001-task-crud)
+
+## Project Structure
+
+```text
+backend/
+├── src/
+│   ├── models/
+│   ├── api/
+│   └── core/
+├── tests/
+└── .env
+
+frontend/
+├── src/
+│   ├── app/
+│   ├── components/
+│   └── lib/
+└── .env.local
+
+specs/
+└── 001-task-crud/
+    ├── spec.md
+    ├── plan.md
+    ├── research.md
+    ├── data-model.md
+    ├── quickstart.md
+    └── contracts/
+```
+
+## Commands
+
+**Backend:**
+```bash
+cd backend
+uvicorn src.main:app --reload  # Development
+pytest  # Run tests
+alembic upgrade head  # Apply migrations
+alembic revision --autogenerate -m "<description>"  # Create migration
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run dev  # Development
+npm test  # Run tests
+npm run build  # Build for production
+```
+
+## Code Style
+
+**Python (Backend):** Follow PEP 8, use type hints, docstrings for public APIs
+**TypeScript (Frontend):** Follow Next.js App Router patterns, ESLint compliance
+**SQL:** Use proper indexing on foreign keys and frequently queried fields
+
+## Recent Changes
+
+- 001-task-crud: Added Python 3.11+ + TypeScript 5.0+
+- 001-task-crud: Added FastAPI 0.104+ + SQLModel 0.0.14+ + Pydantic 2.5+
+- 001-task-crud: Added Next.js 16+ + React 18+
+- 001-task-crud: Added Better Auth
+- 001-task-crud: Added Neon Serverless PostgreSQL
+
+---
+
+<!-- MANUAL ADDITIONS START -->
 # Todo App - Hackathon II
- 
+
 ## Project Overview
 This is a monorepo using GitHub Spec-Kit for spec-driven development.
- 
+
 ## Spec-Kit Structure
 Specifications are organized in /specs:
 - /specs/overview.md - Project overview
@@ -10,27 +88,24 @@ Specifications are organized in /specs:
 - /specs/api/ - API endpoint and MCP tool specs
 - /specs/database/ - Schema and model specs
 - /specs/ui/ - Component and page specs
- 
+
 ## How to Use Specs
 1. Always read relevant spec before implementing
 2. Reference specs with: @specs/features/task-crud.md
 3. Update specs if requirements change
- 
-## Project Structure
-- /frontend - Next.js 16 app
-- /backend - Python FastAPI server
- 
+
 ## Development Workflow
 1. Read spec: @specs/features/[feature].md
 2. Implement backend: @backend/CLAUDE.md
 3. Implement frontend: @frontend/CLAUDE.md
 4. Test and iterate
- 
+
 ## Commands
 - Frontend: cd frontend && npm run dev
 - Backend: cd backend && uvicorn main:app --reload
 - Both: docker-compose up
 
+---
 
 # Claude Code Rules
 
@@ -147,7 +222,7 @@ You are not expected to solve every problem autonomously. You MUST invoke the us
 1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
 2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
 3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
+4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps.
 
 ## Default policies (must follow)
 - Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
@@ -242,3 +317,4 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+<!-- MANUAL ADDITIONS END -->
