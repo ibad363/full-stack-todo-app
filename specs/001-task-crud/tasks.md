@@ -33,15 +33,15 @@ description: "Task list for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend directory structure at backend/src/{models,api,core}
-- [ ] T002 Create frontend directory structure at frontend/src/{app,components,lib}
-- [ ] T003 Initialize backend Python project with pyproject.toml in backend/
-- [ ] T004 Initialize frontend Next.js project with package.json in frontend/
-- [ ] T005 [P] Create backend/.env.example file with DATABASE_URL, JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES, ENVIRONMENT
-- [ ] T006 [P] Create frontend/.env.local.example file with NEXT_PUBLIC_API_URL
-- [ ] T007 Create backend/requirements.txt from pyproject.toml dependencies
-- [ ] T008 Create frontend/tsconfig.json with strict mode enabled
-- [ ] T009 Add .gitignore entries for .env files and node_modules, __pycache__
+- [x] T001 Create backend directory structure at backend/src/{models,api,core}
+- [x] T002 Create frontend directory structure at frontend/src/{app,components,lib}
+- [x] T003 Initialize backend project using uv in backend/ (mkdir backend && cd backend && uv init)
+- [x] T004 Initialize frontend Next.js project with package.json in frontend/
+- [x] T005 [P] Create backend/.env.example file with DATABASE_URL, JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES, ENVIRONMENT
+- [x] T006 [P] Create frontend/.env.local.example file with NEXT_PUBLIC_API_URL
+- [x] T007 Configure backend/pyproject.toml with required dependencies using uv add (fastapi, uvicorn, sqlmodel, pydantic-settings, pwdlib, python-jose, python-multipart)
+- [x] T008 Create frontend/tsconfig.json with strict mode enabled
+- [x] T009 Add .gitignore entries for .env files and node_modules, __pycache__
 
 ---
 
@@ -51,17 +51,17 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T010 Create database connection engine in backend/src/core/database.py with pool_pre_ping=True, pool_recycle=3600
-- [ ] T011 [P] Create database session dependency in backend/src/api/dependencies.py with get_session() generator
-- [ ] T012 Create environment configuration in backend/src/core/config.py with Settings class using pydantic_settings
-- [ ] T013 [P] Implement password hashing with Argon2 in backend/src/core/security.py (hash_password, verify_password)
-- [ ] T014 [P] Implement JWT token creation in backend/src/core/security.py (create_access_token with HS256 algorithm)
-- [ ] T015 [P] Implement JWT token verification in backend/src/core/security.py (verify_access_token returning User object)
-- [ ] T016 [P] Create OAuth2PasswordBearer scheme in backend/src/core/security.py for FastAPI integration
-- [ ] T017 Create User SQLModel with id, email (unique), password_hash, created_at in backend/src/models/user.py
-- [ ] T018 Create Task SQLModel with id, user_id (FK), title, description, completed, timestamps in backend/src/models/task.py
-- [ ] T019 Create User/Task relationship (back_populates) in backend/src/models/
-- [ ] T020 Create FastAPI application entry point in backend/src/main.py with CORS middleware configured
+- [x] T010 Create database connection engine in backend/src/core/database.py with pool_pre_ping=True, pool_recycle=3600
+- [x] T011 [P] Create database session dependency in backend/src/api/dependencies.py with get_session() generator
+- [x] T012 Create environment configuration in backend/src/core/config.py with Settings class using pydantic_settings
+- [x] T013 [P] Implement password hashing with Argon2 in backend/src/core/security.py (hash_password, verify_password)
+- [x] T014 [P] Implement JWT token creation in backend/src/core/security.py (create_access_token with HS256 algorithm)
+- [x] T015 [P] Implement JWT token verification in backend/src/core/security.py (verify_access_token returning User object)
+- [x] T016 [P] Create OAuth2PasswordBearer scheme in backend/src/core/security.py for FastAPI integration
+- [x] T017 Create User SQLModel with id, email (unique), password_hash, created_at in backend/src/models/user.py
+- [x] T018 Create Task SQLModel with id, user_id (FK), title, description, completed, timestamps in backend/src/models/task.py
+- [x] T019 Create User/Task relationship (back_populates) in backend/src/models/
+- [x] T020 Create FastAPI application entry point in backend/src/main.py with CORS middleware configured
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -75,30 +75,30 @@ description: "Task list for feature implementation"
 
 ### Backend Authentication (US1)
 
-- [ ] T021 [P] [US1] Create UserRegister Pydantic schema in backend/src/models/user.py with email validation and password min 8 chars
-- [ ] T022 [P] [US1] Create UserLogin Pydantic schema in backend/src/models/user.py with email and password fields
-- [ ] T023 [P] [US1] Create UserRead Pydantic schema in backend/src/models/user.py with id, email, created_at (no password_hash)
-- [ ] T024 [P] [US1] Create TokenResponse schema in backend/src/models/user.py with access_token, token_type, expires_in
-- [ ] T025 [P] [US1] Implement POST /api/auth/register endpoint in backend/src/api/auth.py that hashes password with Argon2 and creates User in DB
-- [ ] T026 [P] [US1] Implement POST /api/auth/login endpoint in backend/src/api/auth.py that verifies password and returns JWT token
-- [ ] T027 [P] [US1] Implement POST /api/auth/logout endpoint in backend/src/api/auth.py (client-side cleanup only)
-- [ ] T028 Add get_current_user dependency in backend/src/api/dependencies.py using OAuth2 scheme and JWT verification
-- [ ] T029 Test backend authentication with pytest in backend/tests/test_auth.py (register with valid data, register with invalid email, login with valid credentials, login with invalid credentials, JWT verification with expired token)
+- [x] T021 [P] [US1] Create UserRegister Pydantic schema in backend/src/models/user.py with email validation and password min 8 chars
+- [x] T022 [P] [US1] Create UserLogin Pydantic schema in backend/src/models/user.py with email and password fields
+- [x] T023 [P] [US1] Create UserRead Pydantic schema in backend/src/models/user.py with id, email, created_at (no password_hash)
+- [x] T024 [P] [US1] Create TokenResponse schema in backend/src/models/user.py with access_token, token_type, expires_in
+- [x] T025 [P] [US1] Implement POST /api/auth/register endpoint in backend/src/api/auth.py that hashes password with Argon2 and creates User in DB
+- [x] T026 [P] [US1] Implement POST /api/auth/login endpoint in backend/src/api/auth.py that verifies password and returns JWT token
+- [x] T027 [P] [US1] Implement POST /api/auth/logout endpoint in backend/src/api/auth.py (client-side cleanup only)
+- [x] T028 Add get_current_user dependency in backend/src/api/dependencies.py using OAuth2 scheme and JWT verification
+- [x] T029 Test backend authentication with pytest in backend/tests/test_auth.py (register with valid data, register with invalid email, login with valid credentials, login with invalid credentials, JWT verification with expired token)
 
 ### Frontend Authentication (US1)
 
-- [ ] T030 [P] [US1] Install Better Auth package in frontend/ (npm install better-auth)
-- [ ] T031 [P] [US1] Create Better Auth configuration in frontend/src/lib/auth.ts with session configuration
-- [ ] T032 Create AuthProvider component in frontend/src/components/auth/AuthProvider.tsx wrapping Better Auth provider
-- [ ] T033 Create LoginForm component in frontend/src/components/auth/LoginForm.tsx with email and password fields
-- [ ] T034 Create RegisterForm component in frontend/src/components/auth/RegisterForm.tsx with email and password fields
-- [ ] T035 Create login page at frontend/src/app/login/page.tsx with LoginForm and redirect to dashboard on success
-- [ ] T036 Create register page at frontend/src/app/register/page.tsx with RegisterForm and redirect to login on success
-- [ ] T037 Update root layout in frontend/src/app/layout.tsx to include AuthProvider
-- [ ] T038 [P] [US1] Create API client wrapper in frontend/src/lib/api.ts with getAuthToken() from cookies and apiFetch() function
-- [ ] T039 [P] [US1] Add login/register API methods to frontend/src/lib/api.ts (api.login, api.register)
-- [ ] T040 Create route middleware in frontend/src/middleware.ts that redirects unauthenticated users to /login
-- [ ] T041 Test frontend authentication with Jest + React Testing Library in frontend/tests/auth.test.tsx (LoginForm renders correctly, RegisterForm validates email format, AuthProvider provides session, unauthenticated redirect to login works)
+- [x] T030 [P] [US1] Install Better Auth package in frontend/ (npm install better-auth)
+- [x] T031 [P] [US1] Create Better Auth configuration in frontend/src/lib/auth.ts with session configuration
+- [x] T032 Create AuthProvider component in frontend/src/components/auth/AuthProvider.tsx wrapping Better Auth provider
+- [x] T033 Create LoginForm component in frontend/src/components/auth/LoginForm.tsx with email and password fields
+- [x] T034 Create RegisterForm component in frontend/src/components/auth/RegisterForm.tsx with email and password fields
+- [x] T035 Create login page at frontend/src/app/login/page.tsx with LoginForm and redirect to dashboard on success
+- [x] T036 Create register page at frontend/src/app/register/page.tsx with RegisterForm and redirect to login on success
+- [x] T037 Update root layout in frontend/src/app/layout.tsx to include AuthProvider
+- [x] T038 [P] [US1] Create API client wrapper in frontend/src/lib/api.ts with getAuthToken() from cookies and apiFetch() function
+- [x] T039 [P] [US1] Add login/register API methods to frontend/src/lib/api.ts (api.login, api.register)
+- [x] T040 Create route middleware in frontend/src/middleware.ts that redirects unauthenticated users to /login
+- [x] T041 Test frontend authentication with Jest + React Testing Library in frontend/tests/auth.test.tsx (LoginForm renders correctly, RegisterForm validates email format, AuthProvider provides session, unauthenticated redirect to login works)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - users can register, login, and receive JWT tokens.
 
