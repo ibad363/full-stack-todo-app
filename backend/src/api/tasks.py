@@ -10,18 +10,18 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 @router.get("/", response_model=List[TaskRead])
 def list_tasks(
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    current_user: CurrentUserDep,
+    session: Session = Depends(get_session)
 ):
     statement = select(Task).where(Task.user_id == current_user.id).order_by(Task.completed.asc(), Task.created_at.desc())
-    tasks = session.exec(statement).all()
+    tasks = session.execute(statement).scalars().all()
     return tasks
 
 @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(
+    current_user: CurrentUserDep,
     task_in: TaskCreate,
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    session: Session = Depends(get_session)
 ):
     db_task = Task.model_validate(task_in, update={"user_id": current_user.id})
     session.add(db_task)
@@ -31,9 +31,9 @@ def create_task(
 
 @router.get("/{task_id}", response_model=TaskRead)
 def read_task(
+    current_user: CurrentUserDep,
     task_id: int,
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    session: Session = Depends(get_session)
 ):
     task = session.get(Task, task_id)
     if not task:
@@ -44,10 +44,10 @@ def read_task(
 
 @router.patch("/{task_id}", response_model=TaskRead)
 def update_task(
+    current_user: CurrentUserDep,
     task_id: int,
     task_in: TaskUpdate,
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    session: Session = Depends(get_session)
 ):
     task = session.get(Task, task_id)
     if not task:
@@ -67,9 +67,9 @@ def update_task(
 
 @router.patch("/{task_id}/toggle", response_model=TaskRead)
 def toggle_task(
+    current_user: CurrentUserDep,
     task_id: int,
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    session: Session = Depends(get_session)
 ):
     task = session.get(Task, task_id)
     if not task:
@@ -88,9 +88,9 @@ def toggle_task(
 
 @router.delete("/{task_id}")
 def delete_task(
+    current_user: CurrentUserDep,
     task_id: int,
-    session: Session = Depends(get_session),
-    current_user: CurrentUserDep = Depends()
+    session: Session = Depends(get_session)
 ):
     task = session.get(Task, task_id)
     if not task:

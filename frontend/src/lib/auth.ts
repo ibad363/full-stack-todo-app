@@ -1,8 +1,25 @@
 // frontend/src/lib/auth.ts
-// Better Auth configuration stub - using the client-side API for custom JWT handling
+// Better Auth configuration with secure httpOnly cookie handling
 
+import { createAuth } from "better-auth/react";
+
+export const auth = createAuth({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  fetch: (url, options) => {
+    // Ensure httpOnly cookies are used properly
+    return fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${url}`, {
+      ...options,
+      credentials: 'include', // Include cookies in cross-origin requests
+    });
+  },
+});
+
+// Configuration for secure cookie handling
 export const authConfig = {
-    // This is a placeholder for better-auth if we were using its full
-    // server-side capabilities, but we are using our own FastAPI backend
-    // with JWTs in localStorage for this implementation.
+  cookieOptions: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+  }
 };

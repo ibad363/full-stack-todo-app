@@ -456,5 +456,37 @@ The full OpenAPI 3.0 specification is available in `openapi.yaml`. You can use i
 
 ---
 
+## Implementation Notes
+
+Based on actual implementation, the following details were discovered:
+
+### JWT Token Implementation
+- Algorithm: HS256 (HMAC with SHA-256)
+- Secret key stored in `JWT_SECRET` environment variable
+- Token expiration: 7 days (604800 seconds) by default
+- Token payload includes `sub` claim with user ID
+
+### Database Connection
+- PostgreSQL with Neon Serverless
+- Connection pooling with `pool_pre_ping=True` and `pool_recycle=3600`
+- SQLModel ORM with automatic table creation
+
+### Error Handling
+- FastAPI automatic validation with Pydantic models
+- Custom HTTP exceptions for authentication/authorization errors
+- Database transaction management with proper rollback on errors
+
+### Rate Limiting
+- Implemented using slowapi for authentication endpoints
+- Register: 5 requests per IP per hour
+- Login: 10 requests per IP per minute
+
+### CORS Configuration
+- Origins: `http://localhost:3000` (dev), production domain (prod)
+- Credentials: allowed (for JWT tokens)
+- Headers: `Content-Type`, `Authorization`
+
+---
+
 **Phase 1 Status**: Complete ✅
 **Next Phase**: Generate Quickstart Guide (`quickstart.md`)

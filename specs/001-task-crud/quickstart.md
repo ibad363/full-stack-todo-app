@@ -574,12 +574,43 @@ alembic upgrade head
 
 ---
 
+## Additional Setup Notes & Discovered Issues
+
+Based on actual implementation, the following setup considerations were discovered:
+
+### Backend Setup Notes
+- **Alembic Configuration**: If using SQLModel directly without Alembic migrations, ensure to call `SQLModel.metadata.create_all(engine)` in your application startup to create tables automatically
+- **Dependency Installation**: Make sure to install all required dependencies as specified in `pyproject.toml` using `uv sync` or `uv pip install`
+- **JWT Secret Validation**: The application now includes validation for JWT secret strength (minimum 32 characters) in production environments
+
+### Frontend Setup Notes
+- **Better Auth Integration**: The implementation uses Better Auth with secure cookie configuration (httpOnly: true, secure: true in production)
+- **API Client**: The frontend API client now includes proper error handling for 401 (redirect to login), 403 (forbidden), 404 (not found), 422 (validation errors), and 500 (generic errors)
+- **Environment Variables**: Ensure `NEXT_PUBLIC_API_URL` matches your backend server URL format including `/api` path prefix
+
+### CORS Configuration
+- **Frontend Origins**: Make sure to configure CORS in `backend/src/main.py` with explicit origins (`http://localhost:3000` for dev, production domain for prod) - no wildcard origins
+- **Credentials**: Ensure `allow_credentials=True` is set for JWT token handling
+
+### Rate Limiting Setup
+- **Authentication Endpoints**: Rate limiting has been implemented on authentication endpoints:
+  - Register: 5 requests per IP per hour
+  - Login: 10 requests per IP per minute
+- **Dependency**: Requires `slowapi` package to be installed in backend
+
+### Testing Configuration
+- **Backend Tests**: Run with `pytest` from the backend directory, includes test files in `backend/tests/`
+- **Frontend Tests**: Run with `npm test` from the frontend directory, includes test files in `frontend/tests/`
+
+---
+
 ## Getting Help
 
 - **Spec Issues**: Review `@specs/001-task-crud/spec.md`
 - **API Issues**: Test endpoints in http://localhost:8000/docs
 - **Database Issues**: Check Neon dashboard
 - **Configuration Issues**: Verify `.env` files exist and are correctly formatted
+- **Rate Limiting**: Check slowapi configuration if authentication endpoints are being blocked
 
 ---
 

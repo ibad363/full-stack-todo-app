@@ -31,8 +31,9 @@ export function LoginForm() {
       <h2 className="text-2xl font-bold text-center">Login</h2>
       {error && <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
         <input
+          id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -41,8 +42,9 @@ export function LoginForm() {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Password</label>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

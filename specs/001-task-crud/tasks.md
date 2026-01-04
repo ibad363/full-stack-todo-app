@@ -112,28 +112,28 @@ description: "Task list for feature implementation"
 
 ### Backend Task CRUD (US2)
 
-- [ ] T042 [P] [US2] Create TaskCreate Pydantic schema in backend/src/models/task.py with title (required, min 1, max 200), description (optional, max 2000)
-- [ ] T043 [P] [US2] Create TaskUpdate Pydantic schema in backend/src/models/task.py with title (optional), description (optional)
-- [ ] T044 [P] [US2] Create TaskRead Pydantic schema in backend/src/models/task.py with all task fields
-- [ ] T045 [P] [US2] Implement GET /api/tasks endpoint in backend/src/api/tasks.py that filters by current_user.id and sorts by completed ASC, created_at ASC
-- [ ] T046 [P] [US2] Implement POST /api/tasks endpoint in backend/src/api/tasks.py that creates task with user_id=current_user.id
-- [ ] T047 [P] [US2] Implement GET /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before returning task
-- [ ] T048 [P] [US2] Implement PATCH /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before updating title/description and updates updated_at timestamp
-- [ ] T049 [P] [US2] Implement PATCH /api/tasks/{task_id}/toggle endpoint in backend/src/api/tasks.py that flips completed status, sets/clears completed_at, updates updated_at
-- [ ] T050 [P] [US2] Implement DELETE /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before deleting
-- [ ] T051 Test backend task CRUD with pytest in backend/tests/test_tasks.py (create task, list tasks filtered by user, get task by ID, update task, toggle task, delete task, unauthorized access to another user's task returns 403, task not found returns 404)
+- [x] T042 [P] [US2] Create TaskCreate Pydantic schema in backend/src/models/task.py with title (required, min 1, max 200), description (optional, max 2000)
+- [x] T043 [P] [US2] Create TaskUpdate Pydantic schema in backend/src/models/task.py with title (optional), description (optional)
+- [x] T044 [P] [US2] Create TaskRead Pydantic schema in backend/src/models/task.py with all task fields
+- [x] T045 [P] [US2] Implement GET /api/tasks endpoint in backend/src/api/tasks.py that filters by current_user.id and sorts by completed ASC, created_at ASC
+- [x] T046 [P] [US2] Implement POST /api/tasks endpoint in backend/src/api/tasks.py that creates task with user_id=current_user.id
+- [x] T047 [P] [US2] Implement GET /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before returning task
+- [x] T048 [P] [US2] Implement PATCH /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before updating title/description and updates updated_at timestamp
+- [x] T049 [P] [US2] Implement PATCH /api/tasks/{task_id}/toggle endpoint in backend/src/api/tasks.py that flips completed status, sets/clears completed_at, updates updated_at
+- [x] T050 [P] [US2] Implement DELETE /api/tasks/{task_id} endpoint in backend/src/api/tasks.py that validates ownership before deleting
+- [x] T051 Test backend task CRUD with pytest in backend/tests/test_tasks.py (create task, list tasks filtered by user, get task by ID, update task, toggle task, delete task, unauthorized access to another user's task returns 403, task not found returns 404)
 
 ### Frontend Task UI (US2)
 
-- [ ] T052 [P] [US2] Create TypeScript types in frontend/src/lib/types.ts matching backend Pydantic schemas (User, Task, TaskCreate, TaskUpdate)
-- [ ] T053 [P] [US2] Add task API methods to frontend/src/lib/api.ts (api.listTasks, api.createTask, api.updateTask, api.toggleTask, api.deleteTask, api.getTask)
-- [ ] T054 Create TaskItem component in frontend/src/components/TaskItem.tsx displaying task details with edit/delete/toggle buttons
-- [ ] T055 Create TaskForm component in frontend/src/components/TaskForm.tsx for creating/editing tasks with title and description fields
-- [ ] T056 Create TaskList component in frontend/src/components/TaskList.tsx rendering list of TaskItem components
-- [ ] T057 Create dashboard layout in frontend/src/app/dashboard/layout.tsx with route protection (unauthenticated users redirected to login)
-- [ ] T058 Create dashboard page at frontend/src/app/dashboard/page.tsx that fetches tasks on load and renders TaskList
-- [ ] T059 Add error handling to frontend/src/lib/api.ts for 401 (redirect to login), 403 (show forbidden message), 404 (show not found), 422 (show validation errors), 500 (show generic error)
-- [ ] T060 Test frontend task UI with Jest + React Testing Library in frontend/tests/tasks.test.tsx (TaskForm creates task with valid title, TaskList renders tasks, TaskItem toggles completion, delete button calls API, error handling displays correctly)
+- [x] T052 [P] [US2] Create TypeScript types in frontend/src/lib/types.ts matching backend Pydantic schemas (User, Task, TaskCreate, TaskUpdate)
+- [x] T053 [P] [US2] Add task API methods to frontend/src/lib/api.ts (api.listTasks, api.createTask, api.updateTask, api.toggleTask, api.deleteTask, api.getTask)
+- [x] T054 Create TaskItem component in frontend/src/components/TaskItem.tsx displaying task details with edit/delete/toggle buttons
+- [x] T055 Create TaskForm component in frontend/src/components/TaskForm.tsx for creating/editing tasks with title and description fields
+- [x] T056 Create TaskList component in frontend/src/components/TaskList.tsx rendering list of TaskItem components
+- [x] T057 Create dashboard layout in frontend/src/app/dashboard/layout.tsx with route protection (unauthenticated users redirected to login)
+- [x] T058 Create dashboard page at frontend/src/app/dashboard/page.tsx that fetches tasks on load and renders TaskList
+- [x] T059 Add error handling to frontend/src/lib/api.ts for 401 (redirect to login), 403 (show forbidden message), 404 (show not found), 422 (show validation errors), 500 (show generic error)
+- [x] T060 Test frontend task UI with Jest + React Testing Library in frontend/tests/tasks.test.tsx (TaskForm creates task with valid title, TaskList renders tasks, TaskItem toggles completion, delete button calls API, error handling displays correctly)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - users can authenticate and fully manage their tasks.
 
@@ -147,14 +147,14 @@ description: "Task list for feature implementation"
 
 ### Backend Persistence (US3)
 
-- [ ] T061 [P] [US3] Verify Neon PostgreSQL connection pooling in backend/src/core/database.py handles serverless cold starts (pool_pre_ping=True confirmed)
-- [ ] T062 [P] [US3] Verify database session management in backend/src/api/dependencies.py properly commits/rolls back transactions
-- [ ] T063 Test task persistence with pytest in backend/tests/test_persistence.py (create task, close connection, reopen connection, verify task exists, update task, verify update persists, delete task, verify deletion persists)
+- [x] T061 [P] [US3] Verify Neon PostgreSQL connection pooling in backend/src/core/database.py handles serverless cold starts (pool_pre_ping=True confirmed)
+- [x] T062 [P] [US3] Verify database session management in backend/src/api/dependencies.py properly commits/rolls back transactions
+- [x] T063 Test task persistence with pytest in backend/tests/test_persistence.py (create task, close connection, reopen connection, verify task exists, update task, verify update persists, delete task, verify deletion persists)
 
 ### Frontend Persistence (US3)
 
-- [ ] T064 [P] [US3] Verify Better Auth httpOnly cookies are configured securely in frontend/src/lib/auth.ts (httpOnly: true, secure: true in production)
-- [ ] T065 Test frontend persistence in frontend/tests/persistence.test.tsx (create tasks, reload page, tasks still present, logout, login again, tasks still present, edit task, refresh, edit persists)
+- [x] T064 [P] [US3] Verify Better Auth httpOnly cookies are configured securely in frontend/src/lib/auth.ts (httpOnly: true, secure: true in production)
+- [x] T065 Test frontend persistence in frontend/tests/persistence.test.tsx (create tasks, reload page, tasks still present, logout, login again, tasks still present, edit task, refresh, edit persists)
 
 **Checkpoint**: All user stories should now be independently functional with full data persistence
 
@@ -164,15 +164,15 @@ description: "Task list for feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T066 [P] Update API documentation in specs/001-task-crud/contracts/api-overview.md with any discovered implementation details
-- [ ] T067 [P] Update quickstart guide in specs/001-task-crud/quickstart.md with any discovered setup issues
-- [ ] T068 [P] Add request/response examples to FastAPI OpenAPI docs in backend/src/main.py (auto-generated but verify examples)
-- [ ] T069 [P] Implement rate limiting on authentication endpoints in backend/src/main.py (using slowapi or custom middleware) - 5 requests per IP per hour for register, 10 requests per minute for login
-- [ ] T070 [P] Configure CORS origins whitelist in backend/src/main.py (http://localhost:3000 for dev, production domain for prod, no wildcard)
-- [ ] T071 [P] Add logging to backend/src/core/security.py for successful logins, failed login attempts, JWT verification failures
-- [ ] T072 [P] Add validation for JWT secret strength in backend/src/core/config.py (minimum 32 characters)
-- [ ] T073 Verify database indexes in backend/src/models/task.py match data-model.md recommendations (user_id, created_at, compound index on user_id+completed+created_at)
-- [ ] T074 [P] Add server-side error messages in backend/src/main.py (detailed errors in dev, generic in production)
+- [x] T066 [P] Update API documentation in specs/001-task-crud/contracts/api-overview.md with any discovered implementation details
+- [x] T067 [P] Update quickstart guide in specs/001-task-crud/quickstart.md with any discovered setup issues
+- [x] T068 [P] Add request/response examples to FastAPI OpenAPI docs in backend/src/main.py (auto-generated but verify examples)
+- [x] T069 [P] Implement rate limiting on authentication endpoints in backend/src/main.py (using slowapi or custom middleware) - 5 requests per IP per hour for register, 10 requests per minute for login
+- [x] T070 [P] Configure CORS origins whitelist in backend/src/main.py (http://localhost:3000 for dev, production domain for prod, no wildcard)
+- [x] T071 [P] Add logging to backend/src/core/security.py for successful logins, failed login attempts, JWT verification failures
+- [x] T072 [P] Add validation for JWT secret strength in backend/src/core/config.py (minimum 32 characters)
+- [x] T073 Verify database indexes in backend/src/models/task.py match data-model.md recommendations (user_id, created_at, compound index on user_id+completed+created_at)
+- [x] T074 [P] Add server-side error messages in backend/src/main.py (detailed errors in dev, generic in production)
 - [ ] T075 Run backend test suite with coverage check in backend/ (pytest --cov=src --cov-report=html, verify >70% coverage)
 - [ ] T076 Run frontend test suite in frontend/ (npm test, ensure all tests pass)
 - [ ] T077 Run E2E test for critical flow in frontend/ (using Playwright via browsing-with-playwright skill: register → login → create task → toggle task → delete task)

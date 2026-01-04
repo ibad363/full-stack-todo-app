@@ -12,6 +12,31 @@ export interface AuthResponse {
   expires_in: number;
 }
 
+export interface TaskBase {
+  title: string;
+  description?: string | null;
+}
+
+export interface TaskRead extends TaskBase {
+  id: number;
+  user_id: number;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string | null;
+}
+
+export interface TaskCreate extends TaskBase {
+  title: string;
+  description?: string;
+}
+
+export interface TaskUpdate {
+  title?: string;
+  description?: string;
+  completed?: boolean;
+}
+
 class ApiClient {
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
@@ -45,11 +70,42 @@ class ApiClient {
       headers,
     });
 
+    // 401 - Unauthorized: redirect to login
     if (response.status === 401) {
       this.clearToken();
       if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
+      throw new Error('Unauthorized - please log in again');
+    }
+
+    // 403 - Forbidden: show forbidden message
+    if (response.status === 403) {
+      const errorData = await response.json().catch(() => ({ detail: 'Access denied' }));
+      throw new Error(errorData.detail || 'You do not have permission to access this resource');
+    }
+
+    // 404 - Not Found: show not found message
+    if (response.status === 404) {
+      const errorData = await response.json().catch(() => ({ detail: 'Resource not found' }));
+      throw new Error(errorData.detail || 'The requested resource was not found');
+    }
+
+    // 422 - Validation Error: show validation errors
+    if (response.status === 422) {
+      const errorData = await response.json().catch(() => ({ detail: 'Validation error' }));
+      if (errorData.detail) {
+        const messages = Array.isArray(errorData.detail)
+          ? errorData.detail.map((e: any) => e.msg || e.message).join(', ')
+          : errorData.detail;
+        throw new Error(`Validation error: ${messages}`);
+      }
+      throw new Error('Please check your input and try again');
+    }
+
+    // 500 - Internal Server Error: show generic error
+    if (response.status >= 500) {
+      throw new Error('Server error - please try again later');
     }
 
     if (!response.ok) {
@@ -86,6 +142,39 @@ class ApiClient {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  // Task API methods
+  async listTasks(): Promise<TaskRead[]> {
+    return this.request<TaskRead[]>('/tasks');
+  }
+
+  async createTask(data: TaskCreate): Promise<TaskRead> {
+    return this.request<TaskRead>('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getTask(taskId: number): Promise<TaskRead> {
+    return this.request<TaskRead>(`/tasks/${taskId}`);
+  }
+
+  async updateTask(taskId: number, data: TaskUpdate): Promise<TaskRead> {
+    return this.request<TaskRead>(`/tasks/${taskId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async toggleTask(taskId: number): Promise<TaskRead> {
+    return this.request<TaskRead>(`/tasks/${taskId}/toggle`, {
+      method: 'PATCH',
+    });
+  }
+
+  async deleteTask(taskId: number): Promise<void> {
+    await this.request(`/tasks/${taskId}`, { method: 'DELETE' });
   }
 }
 
