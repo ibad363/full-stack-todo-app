@@ -13,7 +13,8 @@ from src.core.security import hash_password
 def client():
     """Create a test client with a clean database for each test."""
     # Create tables
-    init_db()
+    # init_db() - handled by conftest.py
+
 
     with TestClient(app) as client:
         yield client
@@ -29,12 +30,17 @@ def test_task_persistence_across_sessions(client: TestClient):
         "password": "testpassword123"
     }
     response = client.post("/api/auth/register", json=user_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     user_response = response.json()
     assert user_response["email"] == "test@example.com"
+    
+    # Login to get token
+    login_response = client.post("/api/auth/login", json=user_data)
+    assert login_response.status_code == 200
+    token_response = login_response.json()
 
     # Extract the token from the response
-    token = user_response.get("access_token") or user_response.get("data", {}).get("access_token")
+    token = token_response.get("access_token")
     assert token is not None
 
     # Create a task
@@ -44,7 +50,7 @@ def test_task_persistence_across_sessions(client: TestClient):
     }
     headers = {"Authorization": f"Bearer {token}"}
     response = client.post("/api/tasks", json=task_data, headers=headers)
-    assert response.status_code == 200
+    assert response.status_code == 201
     task_response = response.json()
     task_id = task_response["id"]
     assert task_response["title"] == "Test persistence task"
@@ -102,10 +108,13 @@ def test_multiple_users_task_isolation_persistence(client: TestClient):
         "password": "password123"
     }
     response = client.post("/api/auth/register", json=user1_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     user1_response = response.json()
     assert user1_response["email"] == "user1@example.com"
-    user1_token = user1_response.get("access_token") or user1_response.get("data", {}).get("access_token")
+    
+    # Login user 1
+    login1_response = client.post("/api/auth/login", json=user1_data)
+    user1_token = login1_response.json().get("access_token")
     assert user1_token is not None
 
     # Register second user
@@ -114,17 +123,20 @@ def test_multiple_users_task_isolation_persistence(client: TestClient):
         "password": "password123"
     }
     response = client.post("/api/auth/register", json=user2_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     user2_response = response.json()
     assert user2_response["email"] == "user2@example.com"
-    user2_token = user2_response.get("access_token") or user2_response.get("data", {}).get("access_token")
+    
+    # Login user 2
+    login2_response = client.post("/api/auth/login", json=user2_data)
+    user2_token = login2_response.json().get("access_token")
     assert user2_token is not None
 
     # Create tasks for user 1
     task1_data = {"title": "User 1 task", "description": "Task for user 1"}
     headers1 = {"Authorization": f"Bearer {user1_token}"}
     response = client.post("/api/tasks", json=task1_data, headers=headers1)
-    assert response.status_code == 200
+    assert response.status_code == 201
     task1 = response.json()
     task1_id = task1["id"]
 
@@ -132,7 +144,7 @@ def test_multiple_users_task_isolation_persistence(client: TestClient):
     task2_data = {"title": "User 2 task", "description": "Task for user 2"}
     headers2 = {"Authorization": f"Bearer {user2_token}"}
     response = client.post("/api/tasks", json=task2_data, headers=headers2)
-    assert response.status_code == 200
+    assert response.status_code == 201
     task2 = response.json()
     task2_id = task2["id"]
 

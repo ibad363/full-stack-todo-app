@@ -4,10 +4,10 @@
 import { createAuth } from "better-auth/react";
 
 export const auth = createAuth({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
   fetch: (url, options) => {
     // Ensure httpOnly cookies are used properly
-    return fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${url}`, {
+    return fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}${url}`, {
       ...options,
       credentials: 'include', // Include cookies in cross-origin requests
     });

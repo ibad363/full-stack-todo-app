@@ -40,17 +40,33 @@ export interface TaskUpdate {
 class ApiClient {
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('access_token');
+    const name = 'access_token=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return null;
   }
 
   private setToken(token: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('access_token', token);
+    // Set cookie for 7 days
+    const d = new Date();
+    d.setTime(d.getTime() + (7 * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = `access_token=${token};${expires};path=/;SameSite=Lax`;
   }
 
   private clearToken(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem('access_token');
+    document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -133,7 +149,7 @@ class ApiClient {
   }
 
   async logout(): Promise<void> {
-    await this.request('/auth/logout', { method: 'POST' }).catch(() => {});
+    await this.request('/auth/logout', { method: 'POST' }).catch(() => { });
     this.clearToken();
     if (typeof window !== 'undefined') {
       window.location.href = '/login';

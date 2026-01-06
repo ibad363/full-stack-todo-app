@@ -36,6 +36,10 @@ def override_get_session():
 app.dependency_overrides[get_session] = override_get_session
 
 
+
+
+
+
 @pytest.fixture(autouse=True)
 def setup_database():
     SQLModel.metadata.create_all(test_engine)
@@ -51,7 +55,7 @@ def client():
 @pytest.fixture
 def test_user():
     user = User(
-        email="test@example.com",
+        email="task_user@example.com",
         password_hash=hash_password("password123"),
     )
     session = TestingSessionLocal()
@@ -79,18 +83,19 @@ def auth_headers(test_user, client):
     # Login to get token
     response = client.post(
         "/api/auth/login",
-        json={"email": "test@example.com", "password": "password123"}
+        json={"email": "task_user@example.com", "password": "password123"}
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
 
-def create_test_task(user_id, title="Test Task", description="Test Description"):
+def create_test_task(user_id, title="Test Task", description="Test Description", completed=False):
     session = TestingSessionLocal()
     task = Task(
         user_id=user_id,
         title=title,
         description=description,
+        completed=completed,
     )
     session.add(task)
     session.commit()

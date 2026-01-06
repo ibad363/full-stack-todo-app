@@ -8,12 +8,15 @@ if str(backend_path) not in sys.path:
 
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
 
 # Create test engine (SQLite in-memory) BEFORE any app imports
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 test_engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool
 )
 
 # Override the engine in the database module BEFORE app is imported
@@ -28,3 +31,10 @@ import src.models  # registers `User` and `Task` models
 
 # Create all tables for the test database
 SQLModel.metadata.create_all(test_engine)
+
+# Disable rate limiting for tests
+from src.main import limiter as main_limiter
+from src.api.auth import limiter as auth_limiter
+main_limiter.enabled = False
+auth_limiter.enabled = False
+

@@ -14,12 +14,22 @@ from src.models import User, Task  # Ensure models are registered
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+from contextlib import asynccontextmanager
+from src.core.database import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create tables on startup
+    init_db()
+    yield
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Multi-User Task Management API with authentication, task CRUD, and secure user isolation",
     version="1.0.0",
     openapi_url="/api/openapi.json",
     docs_url="/docs",
+    lifespan=lifespan,
     # Add example schemas for better API documentation
     contact={
         "name": "API Support",
@@ -84,11 +94,7 @@ async def general_exception_handler(request, exc):
 
 # CORS configuration - whitelist of allowed origins
 if settings.ENVIRONMENT == "development":
-    origins = [
-        "http://localhost:3000",  # Frontend dev server
-        "http://127.0.0.1:3000",  # Alternative localhost
-        "http://localhost:8000",  # Backend docs for testing
-    ]
+    origins = ["*"]  # Allow all origins in development
 else:
     # Production origins - replace with your actual production domains
     origins = [
