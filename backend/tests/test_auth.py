@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-from src.main import app
-from src.api.dependencies import get_session
+from main import app
+from modules.api.dependencies import get_session
 
 # Setup test database
 sqlite_url = "sqlite://"

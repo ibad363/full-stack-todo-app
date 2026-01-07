@@ -12,11 +12,11 @@ from datetime import datetime
 from sqlmodel import SQLModel
 
 # conftest.py already sets up the test engine override
-from src.main import app
-from src.models.user import User
-from src.models.task import Task
-from src.core.security import hash_password
-from src.api.dependencies import get_session
+from main import app
+from modules.models.user import User
+from modules.models.task import Task
+from modules.core.security import hash_password
+from modules.api.dependencies import get_session
 
 # Import test_engine from conftest which sets up the SQLite test database
 from conftest import test_engine

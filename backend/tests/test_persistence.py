@@ -2,11 +2,11 @@ import pytest
 from sqlmodel import Session, select
 from fastapi.testclient import TestClient
 from unittest.mock import patch
-from src.main import app
-from src.core.database import engine, init_db
-from src.models.user import User, UserRegister
-from src.models.task import Task, TaskCreate
-from src.core.security import hash_password
+from main import app
+from modules.core.database import engine, init_db
+from modules.models.user import User, UserRegister
+from modules.models.task import Task, TaskCreate
+from modules.core.security import hash_password
 
 
 @pytest.fixture(scope="function")
