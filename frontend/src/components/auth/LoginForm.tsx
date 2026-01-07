@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { useAuth } from './AuthProvider';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -27,38 +30,54 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md p-8 bg-white rounded shadow-md">
-      <h2 className="text-2xl font-bold text-center">Login</h2>
-      {error && <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          id="email"
+    <Card className="w-full max-w-md p-8 animate-scale-in">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-secondary-900 mb-2">Welcome Back</h2>
+        <p className="text-secondary-600">Sign in to your account to continue</p>
+      </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg animate-slide-down">
+          <p className="text-sm text-danger-700 flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <Input
+          label="Email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          disabled={isLoading}
         />
-      </div>
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-        <input
-          id="password"
+
+        <Input
+          label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          disabled={isLoading}
         />
-      </div>
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-      >
-        {isLoading ? 'Logging in...' : 'Login'}
-      </button>
-    </form>
+
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          isLoading={isLoading}
+          className="w-full mt-6"
+        >
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </Button>
+      </form>
+    </Card>
   );
 }

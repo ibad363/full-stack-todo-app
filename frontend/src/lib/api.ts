@@ -15,6 +15,7 @@ export interface AuthResponse {
 export interface TaskBase {
   title: string;
   description?: string | null;
+  priority: 'low' | 'medium' | 'high';
 }
 
 export interface TaskRead extends TaskBase {
@@ -34,6 +35,7 @@ export interface TaskCreate extends TaskBase {
 export interface TaskUpdate {
   title?: string;
   description?: string;
+  priority?: 'low' | 'medium' | 'high';
   completed?: boolean;
 }
 

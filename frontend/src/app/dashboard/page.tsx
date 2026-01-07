@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import { api, TaskRead, TaskCreate, TaskUpdate } from '@/lib/api';
 import { TaskList } from '@/components/TaskList';
 import { TaskForm } from '@/components/TaskForm';
+import { Navbar } from '@/components/dashboard/Navbar';
+import { StatsCards } from '@/components/dashboard/StatsCards';
+import { EmptyState } from '@/components/dashboard/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { SearchFilter } from '@/components/dashboard/SearchFilter';
+import { Plus } from 'lucide-react';
 
+/**
+ * Dashboard page - Main application interface
+ */
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<TaskRead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +22,8 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<TaskRead | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
   useEffect(() => {
     loadTasks();
@@ -91,154 +103,110 @@ export default function DashboardPage() {
     setShowForm(false);
   };
 
-  const handleLogout = async () => {
-    await api.logout();
+  const handleAddTask = () => {
+    setEditingTask(null);
+    setShowForm(true);
   };
 
   const pendingCount = tasks.filter((t) => !t.completed).length;
   const completedCount = tasks.filter((t) => t.completed).length;
 
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'pending' && !task.completed) ||
+      (statusFilter === 'completed' && task.completed);
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Task Manager</h1>
-        <button onClick={handleLogout} className="btn-logout">
-          Logout
-        </button>
-      </header>
+    <div className="min-h-screen bg-gradient-primary">
+      <Navbar />
 
-      <div className="dashboard-stats">
-        <div className="stat">
-          <span className="stat-value">{pendingCount}</span>
-          <span className="stat-label">Pending</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{completedCount}</span>
-          <span className="stat-label">Completed</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{tasks.length}</span>
-          <span className="stat-label">Total</span>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Statistics */}
+        <StatsCards
+          pendingCount={pendingCount}
+          completedCount={completedCount}
+          totalCount={tasks.length}
+        />
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg animate-slide-down">
+            <p className="text-sm text-danger-700 flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Search and Filter */}
+        <SearchFilter
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+        />
+
+        {/* Task form */}
+        {showForm && (
+          <TaskForm
+            task={editingTask}
+            onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+            onCancel={handleCancelForm}
+            isLoading={submitting}
+          />
+        )}
+
+        {/* Add task button */}
+        {!showForm && (
+          <Button
+            onClick={handleAddTask}
+            variant="primary"
+            size="lg"
+            className="w-full mb-6 shadow-md hover:shadow-lg"
+          >
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add New Task
+          </Button>
+        )}
+
+        {/* Loading state */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : tasks.length === 0 ? (
+          <EmptyState onAddTask={handleAddTask} />
+        ) : (
+          <TaskList
+            tasks={filteredTasks}
+            onToggle={handleToggleTask}
+            onEdit={handleEdit}
+            onDelete={handleDeleteTask}
+            isLoading={submitting}
+          />
+        )}
       </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      {showForm && (
-        <TaskForm
-          task={editingTask}
-          onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-          onCancel={handleCancelForm}
-          isLoading={submitting}
-        />
-      )}
-
-      {!showForm && (
-        <button
-          onClick={() => {
-            setEditingTask(null);
-            setShowForm(true);
-          }}
-          className="btn-add-task"
-        >
-          + Add New Task
-        </button>
-      )}
-
-      {loading ? (
-        <div className="loading">Loading tasks...</div>
-      ) : (
-        <TaskList
-          tasks={tasks}
-          onToggle={handleToggleTask}
-          onEdit={handleEdit}
-          onDelete={handleDeleteTask}
-          isLoading={submitting}
-        />
-      )}
-
-      <style jsx>{`
-        .dashboard {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 2rem 1rem;
-        }
-        .dashboard-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-        .dashboard-header h1 {
-          margin: 0;
-          font-size: 1.875rem;
-          color: #111827;
-        }
-        .btn-logout {
-          padding: 0.5rem 1rem;
-          background: #e5e7eb;
-          color: #374151;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.875rem;
-          transition: background-color 0.2s;
-        }
-        .btn-logout:hover {
-          background: #d1d5db;
-        }
-        .dashboard-stats {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 2rem;
-          padding: 1rem;
-          background: #f3f4f6;
-          border-radius: 8px;
-        }
-        .stat {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          flex: 1;
-        }
-        .stat-value {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #111827;
-        }
-        .stat-label {
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-        .error-message {
-          padding: 1rem;
-          background: #fee2e2;
-          color: #dc2626;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-        }
-        .btn-add-task {
-          width: 100%;
-          padding: 1rem;
-          background: #10b981;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 1rem;
-          font-weight: 500;
-          margin-bottom: 1.5rem;
-          transition: background-color 0.2s;
-        }
-        .btn-add-task:hover {
-          background: #059669;
-        }
-        .loading {
-          text-align: center;
-          padding: 3rem;
-          color: #6b7280;
-        }
-      `}</style>
     </div>
   );
 }

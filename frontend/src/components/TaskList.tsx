@@ -2,6 +2,7 @@
 
 import { TaskRead } from '@/lib/api';
 import { TaskItem } from './TaskItem';
+import { LoadingSpinner } from './ui/LoadingSpinner';
 
 interface TaskListProps {
   tasks: TaskRead[];
@@ -11,40 +12,16 @@ interface TaskListProps {
   isLoading: boolean;
 }
 
+/**
+ * Task list component displaying all tasks
+ */
 export function TaskList({ tasks, onToggle, onEdit, onDelete, isLoading }: TaskListProps) {
   if (tasks.length === 0) {
-    return (
-      <div className="empty-state">
-        <div className="empty-icon">📋</div>
-        <h3>No tasks yet</h3>
-        <p>Create your first task to get started!</p>
-        <style jsx>{`
-          .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 2px dashed #d1d5db;
-          }
-          .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-          }
-          .empty-state h3 {
-            margin: 0 0 0.5rem 0;
-            color: #374151;
-          }
-          .empty-state p {
-            margin: 0;
-            color: #6b7280;
-          }
-        `}</style>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <ul className="task-list">
+    <div className="space-y-0 animate-fade-in">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
@@ -55,13 +32,6 @@ export function TaskList({ tasks, onToggle, onEdit, onDelete, isLoading }: TaskL
           isLoading={isLoading}
         />
       ))}
-      <style jsx>{`
-        .task-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-      `}</style>
-    </ul>
+    </div>
   );
 }

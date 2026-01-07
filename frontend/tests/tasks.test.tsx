@@ -28,6 +28,7 @@ describe('Task Management UI', () => {
       title: 'Task 1',
       description: 'Description 1',
       completed: false,
+      priority: 'medium' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
@@ -37,6 +38,7 @@ describe('Task Management UI', () => {
       title: 'Task 2',
       description: 'Description 2',
       completed: true,
+      priority: 'medium' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
@@ -67,6 +69,7 @@ describe('Task Management UI', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           title: 'New Task',
           description: 'New Description',
+          priority: 'medium',
         });
       });
     });

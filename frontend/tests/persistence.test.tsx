@@ -29,8 +29,8 @@ describe('Frontend Persistence Tests', () => {
   it.only('should persist tasks after page reload', async () => {
     // Mock tasks that would be returned from API
     const mockTasks = [
-      { id: 1, title: 'Test Task 1', description: 'Test Description 1', completed: false, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-      { id: 2, title: 'Test Task 2', description: 'Test Description 2', completed: true, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
+      { id: 1, title: 'Test Task 1', description: 'Test Description 1', completed: false, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
+      { id: 2, title: 'Test Task 2', description: 'Test Description 2', completed: true, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
     ];
 
     // Mock the API call to return tasks
@@ -72,7 +72,7 @@ describe('Frontend Persistence Tests', () => {
 
   it('should persist tasks when user logs out and logs back in', async () => {
     const mockTasks = [
-      { id: 1, title: 'Persistent Task', description: 'Should persist after login', completed: false, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
+      { id: 1, title: 'Persistent Task', description: 'Should persist after login', completed: false, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
     ];
 
     // Mock login and task list API calls
@@ -113,8 +113,8 @@ describe('Frontend Persistence Tests', () => {
   });
 
   it('should persist task edits after refresh', async () => {
-    const originalTask = { id: 1, title: 'Original Task', description: 'Original Description', completed: false, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' };
-    const updatedTask = { id: 1, title: 'Updated Task', description: 'Updated Description', completed: false, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:01Z' };
+    const originalTask = { id: 1, title: 'Original Task', description: 'Original Description', completed: false, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' };
+    const updatedTask = { id: 1, title: 'Updated Task', description: 'Updated Description', completed: false, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:01Z' };
 
     // Mock initial task list
     (api.api.listTasks as jest.MockedFunction<any>).mockResolvedValue([originalTask]);
@@ -159,7 +159,7 @@ describe('Frontend Persistence Tests', () => {
 
   it('should maintain task state across browser sessions', async () => {
     const mockTasks = [
-      { id: 1, title: 'Session Task', description: 'Should persist across sessions', completed: false, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
+      { id: 1, title: 'Session Task', description: 'Should persist across sessions', completed: false, priority: 'medium' as const, user_id: 1, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' }
     ];
 
     // Mock API call to return tasks from persistent storage
