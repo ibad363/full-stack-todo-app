@@ -1,11 +1,11 @@
 // frontend/src/lib/auth.ts
 // Better Auth configuration with secure httpOnly cookie handling
 
-import { createAuth } from "better-auth/react";
+import { createAuthClient } from "better-auth/react";
 
-export const auth = createAuth({
+export const auth = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
-  fetch: (url, options) => {
+  fetch: (url: string, options: any) => {
     // Ensure httpOnly cookies are used properly
     return fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}${url}`, {
       ...options,
