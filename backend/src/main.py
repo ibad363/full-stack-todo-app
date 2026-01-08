@@ -30,6 +30,7 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     docs_url="/docs",
     lifespan=lifespan,
+    redirect_slashes=False,
     # Add example schemas for better API documentation
     contact={
         "name": "API Support",
@@ -92,15 +93,8 @@ async def general_exception_handler(request, exc):
             content={"detail": "An unexpected error occurred"}
         )
 
-# CORS configuration - whitelist of allowed origins
-if settings.ENVIRONMENT == "development":
-    origins = ["*"]  # Allow all origins in development
-else:
-    # Production origins - replace with your actual production domains
-    origins = [
-        "https://your-production-domain.com",  # Production frontend
-        "https://www.your-production-domain.com",  # Alternative production domain
-    ]
+# CORS configuration - use environment variable
+origins = settings.cors_origins_list
 
 app.add_middleware(
     CORSMiddleware,

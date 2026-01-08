@@ -164,11 +164,11 @@ class ApiClient {
 
   // Task API methods
   async listTasks(): Promise<TaskRead[]> {
-    return this.request<TaskRead[]>('/tasks');
+    return this.request<TaskRead[]>('/tasks/');
   }
 
   async createTask(data: TaskCreate): Promise<TaskRead> {
-    return this.request<TaskRead>('/tasks', {
+    return this.request<TaskRead>('/tasks/', {
       method: 'POST',
       body: JSON.stringify(data),
     });
