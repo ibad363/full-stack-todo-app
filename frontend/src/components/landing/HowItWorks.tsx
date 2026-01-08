@@ -23,12 +23,12 @@ export function HowItWorks() {
     return (
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl sm:text-5xl font-bold text-secondary-900 mb-4">
-                        How It Works
+                <div className="text-center mb-20 px-4">
+                    <h2 className="text-4xl sm:text-6xl font-bold text-secondary-900 dark:text-white mb-6">
+                        Getting Started is <span className="text-gradient-purple">Effortless</span>
                     </h2>
-                    <p className="text-xl text-secondary-600 max-w-2xl mx-auto">
-                        Get started in three simple steps
+                    <p className="text-xl text-secondary-600 dark:text-white/60 max-w-2xl mx-auto">
+                        Join thousands of productive minds master their day in three simple steps.
                     </p>
                 </div>
 

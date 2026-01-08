@@ -1,81 +1,85 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 /**
- * Hero section for landing page
+ * Hero section for AuraTask landing page
  */
 export function Hero() {
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-primary-400/20 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-mesh-gradient pt-20">
+            {/* Animated accent glows */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary-500/20 rounded-full blur-[120px] animate-pulse-slow" />
+                <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-accent-500/20 rounded-full blur-[120px] animate-pulse-slow delay-700" />
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-fade-in border-primary-500/20">
+                    <Sparkles className="w-4 h-4 text-primary-500" />
+                    <span className="text-sm font-medium text-white/80">Introducing AuraTask 2.0</span>
+                </div>
+
                 <div className="animate-slide-up">
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-                        Organize Your Life
+                    <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
+                        Master Your Day with
                         <br />
-                        <span className="text-primary-100">One Task at a Time</span>
+                        <span className="text-gradient">AuraTask</span>
                     </h1>
-                    <p className="text-xl sm:text-2xl text-primary-50 mb-10 max-w-3xl mx-auto leading-relaxed">
-                        A simple, fast, and secure task management app that helps you stay productive and focused on what matters most.
+                    <p className="text-xl sm:text-2xl text-white/60 mb-12 max-w-3xl mx-auto leading-relaxed">
+                        The ultra-minimal, high-performance task manager designed for focused minds.
+                        Experience productivity that feels like a breeze.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
                         <Link href="/register">
                             <Button
                                 size="lg"
-                                className="bg-white text-primary-600 hover:bg-primary-50 shadow-large min-w-[200px]"
+                                className="bg-primary-500 text-white hover:bg-primary-600 shadow-glow px-8 py-6 text-lg h-auto rounded-2xl group"
                             >
-                                Get Started Free
+                                Start for Free
+                                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Button>
                         </Link>
                         <Link href="/login">
                             <Button
                                 size="lg"
                                 variant="ghost"
-                                className="text-white border-2 border-white hover:bg-white/10 min-w-[200px]"
+                                className="text-white hover:bg-white/5 px-8 py-6 text-lg h-auto rounded-2xl border border-white/10"
                             >
-                                Login
+                                View Demo
                             </Button>
                         </Link>
                     </div>
                 </div>
 
-                {/* Feature highlights */}
-                <div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                    {[
-                        { icon: '⚡', text: 'Lightning Fast' },
-                        { icon: '🔒', text: 'Secure & Private' },
-                        { icon: '📱', text: 'Fully Responsive' },
-                    ].map((feature, index) => (
-                        <div
-                            key={index}
-                            className="glass p-6 rounded-xl animate-slide-up"
-                            style={{ animationDelay: `${index * 100}ms` }}
-                        >
-                            <div className="text-4xl mb-2">{feature.icon}</div>
-                            <p className="text-white font-medium">{feature.text}</p>
+                {/* Dashboard Preview / Mockup */}
+                <div className="relative max-w-5xl mx-auto animate-slide-up delay-300">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-[2rem] blur opacity-20" />
+                    <div className="relative glass-dark rounded-[2rem] p-4 sm:p-8 overflow-hidden">
+                        <div className="flex items-center gap-2 mb-6 px-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                            <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                            <div className="w-3 h-3 rounded-full bg-green-500/50" />
                         </div>
-                    ))}
+                        <div className="space-y-4">
+                            {[
+                                { text: 'Complete landing page redesign', category: 'Project', done: true },
+                                { text: 'Implement AuraTask 2.0 branding', category: 'Priority', done: true },
+                                { text: 'Daily standup meeting at 10 AM', category: 'Work', done: false },
+                                { text: 'Review performance metrics', category: 'Analytics', done: false },
+                            ].map((todo, i) => (
+                                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
+                                    <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center ${todo.done ? 'bg-primary-500 border-primary-500' : 'border-white/20'}`}>
+                                        {todo.done && <CheckCircle2 className="w-4 h-4 text-white" />}
+                                    </div>
+                                    <span className={`text-lg ${todo.done ? 'text-white/40 line-through' : 'text-white/90'}`}>{todo.text}</span>
+                                    <span className="ml-auto px-3 py-1 rounded-full bg-white/5 text-xs text-white/50 border border-white/5">{todo.category}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            {/* Scroll indicator */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-                <svg
-                    className="w-6 h-6 text-white"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
             </div>
         </section>
     );

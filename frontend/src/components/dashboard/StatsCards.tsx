@@ -47,23 +47,23 @@ export function StatsCards({ pendingCount, completedCount, totalCount }: StatsCa
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {stats.map((stat, index) => (
-                <Card
+                <div
                     key={index}
-                    className="p-6 animate-slide-up bg-white dark:bg-secondary-900 shadow-soft dark:shadow-none border border-secondary-100 dark:border-secondary-800"
+                    className="glass p-8 animate-slide-up rounded-3xl group border-transparent hover:border-primary-500/20 transition-all duration-500 card-hover"
                     style={{ animationDelay: `${index * 50}ms` }}
                 >
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-secondary-500 dark:text-secondary-400 mb-1">{stat.label}</p>
-                            <p className="text-3xl font-bold text-secondary-900 dark:text-white">{stat.value}</p>
+                            <p className="text-sm font-semibold uppercase tracking-wider text-secondary-500 dark:text-white/40 mb-2">{stat.label}</p>
+                            <p className="text-4xl font-bold font-display text-secondary-900 dark:text-white group-hover:text-primary-500 transition-colors">{stat.value}</p>
                         </div>
-                        <div className={`${stat.bgColor} dark:bg-opacity-10 ${stat.color} p-3 rounded-xl`}>
+                        <div className={`${stat.bgColor} dark:bg-white/5 ${stat.color} p-4 rounded-2xl group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
                             {stat.icon}
                         </div>
                     </div>
-                </Card>
+                </div>
             ))}
         </div>
     );

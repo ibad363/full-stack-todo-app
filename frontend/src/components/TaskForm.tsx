@@ -68,9 +68,9 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
   };
 
   return (
-    <Card className="p-6 mb-6 animate-scale-in dark:bg-secondary-900 border-secondary-200 dark:border-secondary-800">
-      <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-6">
-        {task ? 'Edit Task' : 'Create New Task'}
+    <div className="glass p-8 mb-8 animate-scale-in rounded-[2.5rem] border-primary-500/10 shadow-premium">
+      <h3 className="text-3xl font-bold font-display text-secondary-900 dark:text-white mb-8">
+        {task ? 'Update Task' : 'Master Your Next Task'}
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -145,20 +145,25 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-end gap-4 pt-6">
           <Button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            variant="secondary"
+            variant="ghost"
+            className="px-8 py-6 h-auto rounded-2xl font-bold text-secondary-500 hover:bg-secondary-100 dark:hover:bg-white/5"
           >
             Cancel
           </Button>
-          <Button type="submit" isLoading={isLoading} variant="primary">
-            {task ? 'Update Task' : 'Create Task'}
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="bg-primary-500 hover:bg-primary-600 text-white shadow-glow px-10 py-6 h-auto rounded-2xl font-bold"
+          >
+            {task ? 'Save Changes' : 'Add to My Day'}
           </Button>
         </div>
       </form>
-    </Card>
+    </div>
   );
 }

@@ -37,12 +37,12 @@ export function Features() {
     return (
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-primary">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl sm:text-5xl font-bold text-secondary-900 mb-4">
-                        Everything You Need
+                <div className="text-center mb-16 px-4">
+                    <h2 className="text-4xl sm:text-6xl font-bold text-secondary-900 dark:text-white mb-6">
+                        Everything You Need to <span className="text-gradient">Stay Focused</span>
                     </h2>
-                    <p className="text-xl text-secondary-600 max-w-2xl mx-auto">
-                        Powerful features designed to help you stay organized and productive
+                    <p className="text-xl text-secondary-600 dark:text-white/60 max-w-2xl mx-auto">
+                        Powerful features designed to help you stay organized and achieve more with less effort.
                     </p>
                 </div>
 

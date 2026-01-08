@@ -169,24 +169,11 @@ export default function DashboardPage() {
         {!showForm && (
           <Button
             onClick={handleAddTask}
-            variant="primary"
             size="lg"
-            className="w-full mb-6 shadow-md hover:shadow-lg"
+            className="w-full mb-12 py-8 bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-glow hover:shadow-premium transition-all duration-500 rounded-[2rem] font-bold text-xl group"
           >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add New Task
+            <Plus className="w-6 h-6 mr-3 group-hover:rotate-90 transition-transform duration-500" />
+            Create Your Next Masterpiece
           </Button>
         )}
 

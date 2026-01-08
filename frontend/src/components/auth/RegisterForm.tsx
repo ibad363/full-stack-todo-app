@@ -60,16 +60,21 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-md p-8 animate-scale-in">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-secondary-900 mb-2">Create Account</h2>
-        <p className="text-secondary-600">Get started with your free account</p>
+    <div className="glass w-full max-w-lg p-12 animate-scale-in rounded-[3rem] border-primary-500/10 shadow-premium relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-accent-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+
+      <div className="text-center mb-10 relative z-10">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-glow mx-auto mb-6">
+          <span className="text-white font-bold text-2xl">A</span>
+        </div>
+        <h2 className="text-4xl font-bold font-display text-secondary-900 dark:text-white mb-3">Create Account</h2>
+        <p className="text-lg text-secondary-500 dark:text-white/40">Join AuraTask and start mastering your day.</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg animate-slide-down">
-          <p className="text-sm text-danger-700 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <div className="mb-8 p-5 bg-red-500/10 border border-red-500/20 rounded-2xl animate-slide-down">
+          <p className="text-sm font-medium text-red-500 flex items-center">
+            <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             {error}
@@ -77,40 +82,41 @@ export function RegisterForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
         <Input
-          label="Email"
+          label="Email Address"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="your@email.com"
           required
           disabled={isLoading}
+          className="rounded-2xl py-4"
         />
 
         <div>
           <Input
-            label="Password"
+            label="Strong Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a strong password"
+            placeholder="••••••••"
             required
             minLength={8}
             disabled={isLoading}
-            helperText="Minimum 8 characters"
+            className="rounded-2xl py-4"
           />
 
           {/* Password strength indicator */}
           {password && (
-            <div className="mt-2 animate-slide-down">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-secondary-600">Password strength:</span>
-                <span className="text-xs font-medium text-secondary-700">{passwordStrength.label}</span>
+            <div className="mt-4 animate-slide-down bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-secondary-400">Strength</span>
+                <span className="text-xs font-bold text-primary-500">{passwordStrength.label}</span>
               </div>
-              <div className="h-2 bg-secondary-200 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-secondary-200 dark:bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                  className={`h-full transition-all duration-500 ${passwordStrength.color} shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
                   style={{ width: `${passwordStrength.strength}%` }}
                 />
               </div>
@@ -119,26 +125,25 @@ export function RegisterForm() {
         </div>
 
         <Input
-          label="Confirm Password"
+          label="Confirm Secure Password"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm your password"
+          placeholder="••••••••"
           required
           disabled={isLoading}
+          className="rounded-2xl py-4"
           error={confirmPassword && password !== confirmPassword ? 'Passwords do not match' : undefined}
         />
 
         <Button
           type="submit"
-          variant="primary"
-          size="lg"
           isLoading={isLoading}
-          className="w-full mt-6"
+          className="w-full py-8 h-auto bg-primary-500 hover:bg-primary-600 text-white shadow-glow hover:shadow-premium transition-all duration-500 rounded-2xl font-bold text-xl mt-4"
         >
-          {isLoading ? 'Creating account...' : 'Create Account'}
+          {isLoading ? 'Creating Account...' : 'Get Started with AuraTask'}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

@@ -12,11 +12,11 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     {/* Brand */}
                     <div>
-                        <h3 className="text-2xl font-bold mb-2 text-gradient-light">
-                            TaskMaster
+                        <h3 className="text-3xl font-bold mb-4 text-gradient">
+                            AuraTask
                         </h3>
-                        <p className="text-secondary-400">
-                            Your simple and powerful task management solution
+                        <p className="text-secondary-400 max-w-xs">
+                            Master your day with the ultra-minimal task manager for focused minds.
                         </p>
                     </div>
 
