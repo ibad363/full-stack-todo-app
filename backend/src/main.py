@@ -93,18 +93,40 @@ async def general_exception_handler(request, exc):
             content={"detail": "An unexpected error occurred"}
         )
 
-# CORS configuration - use environment variable
+# CORS and Private Network Access Configuration
 origins = settings.cors_origins_list
+
+# Note: Middleware added LAST becomes the OUTERMOST layer.
+# We want the PNA middleware to wrap around the CORS middleware.
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,  # Allow cookies and authorization headers
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # Explicit methods
-    allow_headers=["*"],  # Allow all headers including Authorization
-    # Explicitly disallow wildcard for security
-    # No allow_origin_regex used to prevent potential security issues
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_private_network_access_header(request, call_next):
+    # Detect preflight request for Private Network Access
+    is_pna_preflight = (
+        request.method == "OPTIONS" and 
+        request.headers.get("access-control-request-private-network") == "true"
+    )
+    
+    response = await call_next(request)
+    
+    # Force add the header for all requests from Vercel to localhost
+    if is_pna_preflight or request.headers.get("access-control-request-private-network") == "true":
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+        # Force CORS headers if missing (Starlette CORSMiddleware sometimes skips them)
+        origin = request.headers.get("origin")
+        if origin in origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            
+    return response
 
 # Include routers
 app.include_router(auth.router)

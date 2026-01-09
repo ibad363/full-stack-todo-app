@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days
 
-    # CORS
-    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # CORS (Read from .env - required)
+    CORS_ORIGINS: str
 
     @property
     def cors_origins_list(self) -> List[str]:
