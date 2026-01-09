@@ -11,6 +11,8 @@ from src.core.config import settings
 from src.api import auth, tasks
 from src.models import User, Task  # Ensure models are registered
 
+# main.py is the entry point for the FastAPI application
+
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
