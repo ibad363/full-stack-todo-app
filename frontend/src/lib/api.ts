@@ -63,7 +63,9 @@ class ApiClient {
     const d = new Date();
     d.setTime(d.getTime() + (7 * 24 * 60 * 60 * 1000));
     let expires = "expires=" + d.toUTCString();
-    document.cookie = `access_token=${token};${expires};path=/;SameSite=Lax`;
+    // Use SameSite=None;Secure for proper cross-origin cookie handling
+    // This ensures the cookie is immediately available for middleware checks
+    document.cookie = `access_token=${token};${expires};path=/;SameSite=None;Secure`;
   }
 
   private clearToken(): void {
