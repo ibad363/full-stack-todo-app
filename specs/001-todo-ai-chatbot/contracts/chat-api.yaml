@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: Todo AI Chatbot Chat API
+  description: Conversational interface for managing todo tasks
+  version: 1.0.0
+  contact:
+    name: Project Team
+  license:
+    name: MIT
+
+servers:
+  - url: "http://localhost:8000/api"
+    description: Local development
+  - url: "https://api.example.com/api"
+    description: Production
+
+paths:
+  /{user_id}/chat:
+    post:
+      operationId: chatWithBot
+      summary: Send a message to the todo chatbot
+      description: |
+        Send a natural language message to the AI chatbot for task management.
+        The chatbot interprets the message and executes appropriate MCP tools.
+        Conversation history is maintained in the database.
+      tags:
+        - Chat
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User identifier (must match authenticated user)
+          example: "user_abc123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conversation_id:
+                  type: integer
+                  nullable: true
+                  description: |
+                    Optional existing conversation ID.
+                    If not provided, a new conversation will be created.
+                  example: 123
+                message:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                  description: User's natural language input
+                  example: "Add a task to buy groceries"
+              required:
+                - message
+      responses:
+        "200":
+          description: Chat message processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+              examples:
+                taskCreated:
+                  summary: Task creation response
+                  value:
+                    conversation_id: 123
+                    response: "I've added 'buy groceries' to your tasks."
+                    tool_calls:
+                      - tool: add_task
+                        status: success
+                        task_id: 456
+                tasksListed:
+                  summary: List tasks response
+                  value:
+                    conversation_id: 123
+                    response: "You have 1 pending task: buy groceries"
+                    tool_calls:
+                      - tool: list_tasks
+                        status: success
+                        task_count: 1
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                messageTooLong:
+                  summary: Message exceeds maximum length
+                  value:
+                    detail: "Message exceeds maximum length of 1000 characters"
+                    code: "validation_error"
+                emptyMessage:
+                  summary: Empty message
+                  value:
+                    detail: "Message cannot be empty"
+                    code: "validation_error"
+        "401":
+          description: Unauthorized (missing or invalid authentication)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Not authenticated"
+                code: "authentication_error"
+        "403":
+          description: Forbidden (user_id mismatch or access denied)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Access denied"
+                code: "authorization_error"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Conversation 999 not found"
+                code: "not_found_error"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Rate limit exceeded. Please try again later."
+                code: "rate_limit_error"
+        "500":
+          description: |
+            Internal server error or external service failure.
+            The chatbot may return a graceful degradation message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                aiServiceDown:
+                  summary: OpenAI API unavailable
+                  value:
+                    conversation_id: 123
+                    response: "I'm temporarily unable to process your request. Please try again in a moment."
+                    tool_calls: []
+                databaseError:
+                  summary: Database error
+                  value:
+                    detail: "Database connection failed"
+                    code: "internal_error"
+      security:
+        - BearerAuth: []
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+          nullable: true
+          description: Existing conversation ID (optional)
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: User message
+      required:
+        - message
+
+    ChatResponse:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+          description: Conversation identifier (created if not provided in request)
+        response:
+          type: string
+          description: Assistant's natural language response
+        tool_calls:
+          type: array
+          description: List of MCP tools invoked during processing
+          items:
+            type: object
+            properties:
+              tool:
+                type: string
+                enum:
+                  - add_task
+                  - list_tasks
+                  - complete_task
+                  - delete_task
+                  - update_task
+                description: Name of the MCP tool invoked
+              status:
+                type: string
+                enum:
+                  - success
+                  - error
+                description: Tool execution status
+              task_id:
+                type: integer
+                nullable: true
+                description: Task ID (when applicable)
+              error:
+                type: string
+                nullable: true
+                description: Error message (when status is error)
+      required:
+        - conversation_id
+        - response
+        - tool_calls
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code for client handling
+        conversation_id:
+          type: integer
+          nullable: true
+          description: Conversation ID (when applicable)
+      required:
+        - detail
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token in Authorization header.
+        Token must contain user_id matching path parameter.
+
+tags:
+  - name: Chat
+    description: Chat endpoint for conversational task management
+
+x-custom:
+  rateLimit:
+    type: token-bucket
+    capacity: 60
+    refillRate: 1/minute
+    description: Token bucket rate limiting per user
+
+  constraints:
+    maxMessageLength: 1000
+    maxConversationHistory: 100
+    responseTimeout: 5000ms
+
+  behaviors:
+    ambiguousRequests: ask-for-clarification
+    apiFailure: graceful-degradation
+    concurrentModifications: last-write-wins

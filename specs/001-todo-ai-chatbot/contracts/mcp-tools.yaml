@@ -1,0 +1,245 @@
+mcp:
+  version: "1.0"
+  server_name: "TodoChatbot"
+  description: "MCP tools for conversational todo task management"
+
+tools:
+  - name: add_task
+    description: Create a new task in the user's todo list
+    inputSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        title:
+          type: string
+          description: Task title (required)
+          maxLength: 255
+        description:
+          type: string
+          description: Optional task description
+          maxLength: 4000
+      required:
+        - user_id
+        - title
+    outputSchema:
+      type: object
+      properties:
+        task_id:
+          type: integer
+          description: Created task identifier
+        status:
+          type: string
+          enum: ["created"]
+        title:
+          type: string
+          description: Task title
+      required:
+        - task_id
+        - status
+        - title
+    examples:
+      - input:
+          user_id: "user_abc123"
+          title: "Buy groceries"
+          description: "Milk, bread, eggs"
+        output:
+          task_id: 456
+          status: "created"
+          title: "Buy groceries"
+
+  - name: list_tasks
+    description: Retrieve tasks for a user with optional filtering by status
+    inputSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        status:
+          type: string
+          enum:
+            - "all"
+            - "pending"
+            - "completed"
+          description: Filter by completion status (default "all")
+          default: "all"
+      required:
+        - user_id
+    outputSchema:
+      type: array
+      description: List of tasks
+      items:
+        type: object
+        properties:
+          task_id:
+            type: integer
+          title:
+            type: string
+          description:
+            type: string
+            nullable: true
+          completed:
+            type: boolean
+          created_at:
+            type: string
+            format: date-time
+    examples:
+      - input:
+          user_id: "user_abc123"
+          status: "pending"
+        output:
+          - task_id: 456
+            title: "Buy groceries"
+            description: "Milk, bread, eggs"
+            completed: false
+            created_at: "2026-01-11T10:00:00Z"
+          - task_id: 457
+            title: "Write report"
+            description: null
+            completed: false
+            created_at: "2026-01-11T10:05:00Z"
+
+  - name: complete_task
+    description: Mark a task as completed
+    inputSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        task_id:
+          type: integer
+          description: Task identifier to complete
+      required:
+        - user_id
+        - task_id
+    outputSchema:
+      type: object
+      properties:
+        task_id:
+          type: integer
+        status:
+          type: string
+          enum: ["completed"]
+        title:
+          type: string
+      required:
+        - task_id
+        - status
+        - title
+    examples:
+      - input:
+          user_id: "user_abc123"
+          task_id: 456
+        output:
+          task_id: 456
+          status: "completed"
+          title: "Buy groceries"
+
+  - name: delete_task
+    description: Delete a task from the user's todo list
+    inputSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        task_id:
+          type: integer
+          description: Task identifier to delete
+      required:
+        - user_id
+        - task_id
+    outputSchema:
+      type: object
+      properties:
+        task_id:
+          type: integer
+        status:
+          type: string
+          enum: ["deleted"]
+        title:
+          type: string
+      required:
+        - task_id
+        - status
+        - title
+    examples:
+      - input:
+          user_id: "user_abc123"
+          task_id: 456
+        output:
+          task_id: 456
+          status: "deleted"
+          title: "Buy groceries"
+
+  - name: update_task
+    description: Update a task's title and/or description
+    inputSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        task_id:
+          type: integer
+          description: Task identifier to update
+        title:
+          type: string
+          description: New title (optional)
+          maxLength: 255
+        description:
+          type: string
+          description: New description (optional)
+          maxLength: 4000
+      required:
+        - user_id
+        - task_id
+    outputSchema:
+      type: object
+      properties:
+        task_id:
+          type: integer
+        status:
+          type: string
+          enum: ["updated"]
+        title:
+          type: string
+      required:
+        - task_id
+        - status
+        - title
+    examples:
+      - input:
+          user_id: "user_abc123"
+          task_id: 456
+          title: "Buy groceries and prepare dinner"
+        output:
+          task_id: 456
+          status: "updated"
+          title: "Buy groceries and prepare dinner"
+
+errorCodes:
+  - code: "TASK_NOT_FOUND"
+    message: "Task does not exist"
+    httpStatus: 404
+  - code: "USER_UNAUTHORIZED"
+    message: "User not authorized to access this task"
+    httpStatus: 403
+  - code: "INVALID_INPUT"
+    message: "Invalid input parameters"
+    httpStatus: 400
+  - code: "DATABASE_ERROR"
+    message: "Database operation failed"
+    httpStatus: 500
+
+constraints:
+  - name: max_title_length
+    value: 255
+  - name: max_description_length
+    value: 4000
+  - name: max_tasks_per_user
+    value: 1000
+    description: Soft limit for reasonable task list size

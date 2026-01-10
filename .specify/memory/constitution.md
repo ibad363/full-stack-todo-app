@@ -1,9 +1,9 @@
 <!--
 Sync Impact Report:
-Version: 1.0.0 → 1.1.0
-Changes: Added Principle VIII for Skills & Agents usage
-Modified Principles: None
-Added Sections: Skills & Agents (new principle VIII)
+Version: 1.1.0 → 1.2.0
+Changes: Added new skills (openai-agents-gemini, mcp-todo-skill, mcp-sdk) and updated usage guidance
+Modified Principles: VIII (expanded with new skills)
+Added Sections: mcp-sdk and mcp-todo-skill skills
 Removed Sections: None
 Templates Status:
   - plan-template.md: ✅ validated (no changes needed)
@@ -81,10 +81,9 @@ Follow-up: None
   /adr/          - Architecture Decision Records
 /frontend/       - Next.js 16+ App Router application (SEPARATE folder)
 /backend/        - FastAPI application with SQLModel (SEPARATE folder)
-/.specify/       - Templates, scripts, constitution
-/.claude/         - Skills and agents configuration
-  /skills/        - Claude Code skills (context7, browsing-with-playwright, spec-validation)
-  /agents/        - Specialized agents (frontend-spec-implementer, backend-auth-guardian, spec-authority)
+/.claude/        - Templates, scripts, constitution
+  /skills/       - Claude Code skills (context7, browsing-with-playwright, spec-validation, openai-agents-gemini, mcp-todo-skill, mcp-sdk)
+  /agents/       - Specialized agents (frontend-spec-implementer, backend-auth-guardian, spec-authority)
 ```
 
 **Rationale**: Predictable structure, enforces separation of concerns, supports tooling, and enables Spec-Kit automation.
@@ -105,10 +104,33 @@ Follow-up: None
 **MANDATORY**: Specialized tools MUST be used when appropriate:
 
 **Skills (Located in `.claude/skills/`)**:
-- **context7-efficient**: MUST use for library documentation needs (fetching code examples, API references, best practices for JavaScript, Python, Go, Rust, etc.) when user asks about library docs, code examples, API usage, or learning new frameworks
-- **browsing-with-playwright**: MUST use for web browsing, form submission, web scraping, or UI testing tasks when static content retrieval is insufficient
-- **spec-validation**: MUST use to validate Phase II specifications BEFORE moving from specification to planning or implementation (ensures completeness, testability, and requirement fulfillment)
-- **Other skills**: Use project-specific skills as defined in `.claude/skills/` when applicable to the task
+
+**Documentation & Research**:
+- **context7-efficient**: MUST use for library documentation needs (fetching code examples, API references, best practices for JavaScript, Python, Go, Rust, and other libraries). Triggered when user asks about library docs, code examples, API usage patterns, framework syntax, or learning new technologies.
+
+**Agents & AI Integration**:
+- **openai-agents-gemini**: MUST use when implementing agents logic using OpenAI Agents SDK with Gemini models. This skill provides patterns for AsyncOpenAI with Gemini base_url, function_tool based tools, Agent creation, and Runner.run_sync patterns. Use for any agent implementation requiring Gemini via OpenAI-compatible API.
+- **mcp-sdk**: MUST use when working with Model Context Protocol (MCP) server development, client connections, or SDK integration. Covers MCP server creation, tool definitions, and client-server patterns.
+- **mcp-todo-skill**: MUST use for todo management via AI, MCP server setup for task management, or implementing conversational agent toolsets. Use when building MCP-based todo/task tools.
+
+**Browser & UI Automation**:
+- **browsing-with-playwright**: MUST use for web browsing, form submission, web scraping, or UI testing when static content retrieval (curl/wget) is insufficient.
+
+**Specification & Validation**:
+- **spec-validation**: MUST use to validate Phase II specifications BEFORE moving from specification to planning or implementation (ensures completeness, testability, and requirement fulfillment).
+
+**Project-Specific Skills**:
+- **api-contract-enforcement**: Use to validate REST endpoint implementations match API specifications.
+- **doc-coauthoring**: Use for documentation, proposals, technical specs, and structured content creation.
+- **docx, pdf, pptx, xlsx**: Use for document manipulation as needed.
+- **theme-factory**: Use for styling artifacts with predefined or custom themes.
+- **skill-creator/validator**: Use for creating or auditing new skills.
+
+**Usage Priority for Agent Logic**:
+- When implementing AI agents: use `openai-agents-gemini` for Gemini-based agents
+- When implementing MCP servers/clients: use `mcp-sdk` and `mcp-todo-skill`
+- When needing documentation: use `context7-efficient` first
+- When building UI tests: use `browsing-with-playwright`
 
 **Agents (Located in `.claude/agents/`)**:
 - **spec-authority**: MUST use when transitioning from design to implementation or when user requests code changes without finalized specification. Acts as gatekeeper to ensure Spec-Driven Development (SDD) process is strictly followed.
@@ -120,6 +142,8 @@ Follow-up: None
 - Skills are for specialized tool execution; agents are for autonomous, multi-step workflows
 - All skills/agents MUST be used in accordance with their documented purpose and scope
 - When implementing features, use spec-authority first if specs are incomplete or outdated
+- When building agent-based features with Gemini, use `openai-agents-gemini` skill for correct patterns
+- When working with MCP, use `mcp-sdk` for SDK patterns and `mcp-todo-skill` for todo management
 
 **Rationale**: Leverages specialized capabilities for better efficiency, enforces consistent patterns across frontend/backend development, ensures security and data isolation through dedicated agents, and maintains Spec-Driven Development integrity.
 
@@ -233,4 +257,4 @@ Follow-up: None
 - Use `.specify/memory/constitution.md` for project guidance
 - Use `CLAUDE.md` (or agent-specific files) for runtime development guidance
 
-**Version**: 1.1.0 | **Ratified**: 2026-01-01 | **Last Amended**: 2026-01-01
+**Version**: 1.2.0 | **Ratified**: 2026-01-01 | **Last Amended**: 2026-01-10
