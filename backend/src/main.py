@@ -8,8 +8,10 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from src.core.config import settings
+from src.core.middleware import TokenBucketRateLimiter, get_client_key
 from src.api import auth, tasks
-from src.models import User, Task  # Ensure models are registered
+from src.api import chat
+from src.models import User, Task, Conversation, Message  # Ensure models are registered
 
 # main.py
 
@@ -47,6 +49,12 @@ app = FastAPI(
 # Add rate limiting middleware
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Token bucket limiter for chat endpoint
+chat_rate_limiter = TokenBucketRateLimiter(
+    capacity=settings.CHAT_RATE_LIMIT_CAPACITY,
+    refill_per_second=settings.CHAT_RATE_LIMIT_REFILL_PER_SECOND,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO if settings.ENVIRONMENT == "development" else logging.WARNING)
@@ -110,6 +118,17 @@ app.add_middleware(
 )
 
 @app.middleware("http")
+async def token_bucket_rate_limit_chat(request, call_next):
+    if settings.RATE_LIMIT_ENABLED and request.method == "POST" and request.url.path.endswith("/chat"):
+        key = get_client_key(request)
+        allowed = await chat_rate_limiter.allow(key)
+        if not allowed:
+            return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Please try again later."})
+
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def add_private_network_access_header(request, call_next):
     # Detect preflight request for Private Network Access
     is_pna_preflight = (
@@ -133,6 +152,7 @@ async def add_private_network_access_header(request, call_next):
 # Include routers
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(chat.router)
 
 @app.get("/api/health")
 def health_check():

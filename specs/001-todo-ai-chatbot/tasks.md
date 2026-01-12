@@ -35,9 +35,9 @@ Initialize project dependencies, create module structure, and prepare developmen
 
 ---
 
-- [ ] T001 Install backend dependencies (FastAPI, SQLModel, openai-agents, mcp, slowapi) in `backend/requirements.txt`
-- [ ] T002 Install frontend dependencies (Next.js, React, TypeScript essentials) in `frontend/package.json`
-- [ ] T003 Create backend module structure: `backend/src/mcp/__init__.py`, `backend/src/models/__init__.py`, `backend/src/services/__init__.py`
+- [x] T001 Install backend dependencies (FastAPI, SQLModel, openai-agents, mcp, slowapi) in `backend/requirements.txt`
+- [x] T002 Install frontend dependencies (Next.js, React, TypeScript essentials) in `frontend/package.json`
+- [x] T003 Create backend module structure: `backend/src/mcp/__init__.py`, `backend/src/models/__init__.py`, `backend/src/services/__init__.py`
 
 ---
 
@@ -57,17 +57,17 @@ Implement shared infrastructure that blocks all user stories.
 
 ### Models & Data Layer
 
-- [ ] T004 Create `Conversation` model in `backend/src/models/conversation.py` with user_id, created_at, updated_at
-- [ ] T005 Create `Message` model in `backend/src/models/message.py` with conversation_id, user_id, role, content, created_at
+- [x] T004 Create `Conversation` model in `backend/src/models/conversation.py` with user_id, created_at, updated_at
+- [x] T005 Create `Message` model in `backend/src/models/message.py` with conversation_id, user_id, role, content, created_at
 
 ### MCP Server Foundation
 
-- [ ] T006 [P] Create MCP server entry point at `backend/src/mcp/server.py` using FastMCP
-- [ ] T007 [P] Create MCP tools module at `backend/src/mcp/tools.py` with placeholder function decorators for add_task, list_tasks, complete_task, delete_task, update_task
+- [x] T006 [P] Create MCP server entry point at `backend/src/mcp/server.py` using FastMCP
+- [x] T007 [P] Create MCP tools module at `backend/src/mcp/tools.py` with placeholder function decorators for add_task, list_tasks, complete_task, delete_task, update_task
 
 ### Chat Service & API Foundation
 
-- [ ] T008 Create `ChatService` class in `backend/src/services/chat_service.py` with async chat() method that accepts user_id, message, and optional conversation_id
+- [x] T008 Create `ChatService` class in `backend/src/services/chat_service.py` with async chat() method that accepts user_id, message, and optional conversation_id
 
 ---
 
@@ -90,9 +90,9 @@ Users can create new tasks by sending natural language messages to the chatbot.
 
 ---
 
-- [ ] T009 [US1] Implement `add_task` MCP tool in `backend/src/mcp/tools.py` that creates task via database
-- [ ] T010 [US1] Integrate OpenAI Agent with `add_task` tool in `backend/src/services/chat_service.py`
-- [ ] T011 [US1] Create `POST /api/{user_id}/chat` endpoint in `backend/src/api/chat.py` that calls ChatService and returns response
+- [x] T009 [US1] Implement `add_task` MCP tool in `backend/src/mcp/tools.py` that creates task via database
+- [x] T010 [US1] Integrate OpenAI Agent with `add_task` tool in `backend/src/services/chat_service.py`
+- [x] T011 [US1] Create `POST /api/{user_id}/chat` endpoint in `backend/src/api/chat.py` that calls ChatService and returns response (validates user_id matches authenticated user)
 
 ---
 
@@ -115,9 +115,9 @@ Users can view their tasks using natural language queries like "Show me all my t
 
 ---
 
-- [ ] T012 [US2] Implement `list_tasks` MCP tool in `backend/src/mcp/tools.py` with status filtering (all, pending, completed)
-- [ ] T013 [US2] Update OpenAI Agent instructions in `backend/src/services/chat_service.py` to handle list queries
-- [ ] T014 [US2] Add conversation history retrieval in `backend/src/services/chat_service.py` to populate chat context
+- [x] T012 [US2] Implement `list_tasks` MCP tool in `backend/src/mcp/tools.py` with status filtering (all, pending, completed)
+- [x] T013 [US2] Update OpenAI Agent instructions in `backend/src/services/chat_service.py` to handle list queries
+- [x] T014 [US2] Add conversation history retrieval in `backend/src/services/chat_service.py` to populate chat context
 
 ---
 
@@ -140,9 +140,9 @@ Users can mark tasks as complete using natural language like "Mark task 3 as don
 
 ---
 
-- [ ] T015 [US3] Implement `complete_task` MCP tool in `backend/src/mcp/tools.py`
-- [ ] T016 [US3] Add task completion logic to OpenAI Agent instructions
-- [ ] T017 [US3] Store assistant response in Message table in `backend/src/services/chat_service.py`
+- [x] T015 [US3] Implement `complete_task` MCP tool in `backend/src/mcp/tools.py`
+- [x] T016 [US3] Add task completion logic to OpenAI Agent instructions
+- [x] T017 [US3] Store assistant response in Message table in `backend/src/services/chat_service.py`
 
 ---
 
@@ -165,9 +165,9 @@ Users can mark tasks as complete using natural language like "Mark task 3 as don
 
 ---
 
-- [ ] T018 [P] [US4] Implement `delete_task` MCP tool in `backend/src/mcp/tools.py`
-- [ ] T019 [P] [US5] Implement `update_task` MCP tool in `backend/src/mcp/tools.py` with title and description updates
-- [ ] T020 [US4/US5] Add delete and update logic to OpenAI Agent instructions
+- [x] T018 [P] [US4] Implement `delete_task` MCP tool in `backend/src/mcp/tools.py`
+- [x] T019 [P] [US5] Implement `update_task` MCP tool in `backend/src/mcp/tools.py` with title and description updates
+- [x] T020 [US4/US5] Add delete and update logic to OpenAI Agent instructions
 
 ---
 
@@ -196,8 +196,8 @@ Users can mark tasks as complete using natural language like "Mark task 3 as don
 
 ---
 
-- [ ] T021 [US6/US7] Implement user_id validation on all API endpoints in `backend/src/api/chat.py`
-- [ ] T022 [US6] Implement token bucket rate limiting middleware in `backend/src/core/middleware.py` with configurable limits
+- [x] T021 [US6/US7] Implement user_id validation on all API endpoints in `backend/src/api/chat.py` (also validates conversation ownership)
+- [x] T022 [US6] Implement token bucket rate limiting middleware in `backend/src/core/middleware.py` with configurable limits
 
 ---
 
@@ -219,15 +219,13 @@ Users can mark tasks as complete using natural language like "Mark task 3 as don
 
 ### Suggested Execution
 ```
-Phase 1: T001, T002, T003 (sequential, ~30 min)
-Phase 2: T004-T005, then T006+T007 parallel, then T008 (seq, ~1-2 hours)
-Phase 3: T009, T010, T011 (sequential, ~1 hour)
-Phase 4: T012, T013, T014 (sequential, ~1 hour)
-Phase 5: T015, T016, T017 (sequential, ~1 hour)
-Phase 6: T018+T019 parallel, then T020 (seq, ~1 hour)
-Phase 7: T021, T022 (sequential, ~1 hour)
-
-Estimated Total: 6-8 hours
+Phase 1: T001, T002, T003 (sequential)
+Phase 2: T004-T005, then T006+T007 parallel, then T008 (sequential)
+Phase 3: T009, T010, T011 (sequential)
+Phase 4: T012, T013, T014 (sequential)
+Phase 5: T015, T016, T017 (sequential)
+Phase 6: T018+T019 parallel, then T020 (sequential)
+Phase 7: T021, T022 (sequential)
 ```
 
 ---
@@ -247,7 +245,7 @@ Estimated Total: 6-8 hours
 - Enables end-to-end testing
 - Can be extended with other operations
 
-**Time**: ~2 hours
+**Time**: TBD
 
 ---
 

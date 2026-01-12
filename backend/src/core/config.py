@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     # CORS (Read from .env - required)
     CORS_ORIGINS: str
 
+    # AI (Gemini via OpenAI-compatible endpoint)
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+
+    # Rate limiting (token bucket)
+    RATE_LIMIT_ENABLED: bool = True
+    CHAT_RATE_LIMIT_CAPACITY: int = 30
+    CHAT_RATE_LIMIT_REFILL_PER_SECOND: float = 0.5  # 30 tokens / minute
+
+
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS string into a list"""

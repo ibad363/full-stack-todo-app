@@ -8,7 +8,7 @@ from ..models.task import Task, TaskCreate, TaskUpdate, TaskRead
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
-@router.get("/", response_model=List[TaskRead])
+@router.get("", response_model=List[TaskRead])
 def list_tasks(
     current_user: CurrentUserDep,
     session: Session = Depends(get_session)
@@ -17,7 +17,7 @@ def list_tasks(
     tasks = session.execute(statement).scalars().all()
     return tasks
 
-@router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(
     current_user: CurrentUserDep,
     task_in: TaskCreate,
