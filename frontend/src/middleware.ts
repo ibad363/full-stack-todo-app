@@ -7,9 +7,10 @@ export function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
                      request.nextUrl.pathname.startsWith('/register');
   const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard');
+  const isChatPage = request.nextUrl.pathname.startsWith('/chat');
 
-  // If trying to access dashboard without token, redirect to login
-  if (isDashboardPage && !token) {
+  // If trying to access protected pages (dashboard or chat) without token, redirect to login
+  if ((isDashboardPage || isChatPage) && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -22,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: ['/dashboard/:path*', '/chat/:path*', '/login', '/register'],
 };

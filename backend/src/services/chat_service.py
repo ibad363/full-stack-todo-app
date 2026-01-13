@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, List
 
-from agents import Agent, AsyncOpenAI, ModelSettings, OpenAIChatCompletionsModel, Runner, function_tool
+from agents import Agent, ModelSettings, OpenAIChatCompletionsModel, Runner, function_tool
+from openai import AsyncOpenAI
 from sqlmodel import Session, select
 
 from ..core.config import settings

@@ -39,6 +39,26 @@ export interface TaskUpdate {
   completed?: boolean;
 }
 
+// Chat interfaces
+export interface ChatRequest {
+  message: string;
+  conversation_id?: number;
+}
+
+export interface ChatToolCall {
+  tool: 'add_task' | 'list_tasks' | 'complete_task' | 'delete_task' | 'update_task';
+  status: 'success' | 'error';
+  task_id?: number;
+  error?: string;
+  task_count?: number; // For list_tasks
+}
+
+export interface ChatResponse {
+  conversation_id: number;
+  response: string;
+  tool_calls: ChatToolCall[];
+}
+
 class ApiClient {
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
@@ -71,6 +91,36 @@ class ApiClient {
   private clearToken(): void {
     if (typeof window === 'undefined') return;
     document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  }
+
+  /**
+   * Helper to parse JWT payload (no external lib needed for simple decoding).
+   */
+  private parseJwt(token: string): { sub: string; exp: number } | null {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Get current authenticated user ID from JWT token.
+   * Returns null if not logged in or token invalid.
+   */
+  getUserId(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+    const decoded = this.parseJwt(token);
+    return decoded && decoded.sub ? parseInt(decoded.sub, 10) : null;
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -166,11 +216,11 @@ class ApiClient {
 
   // Task API methods
   async listTasks(): Promise<TaskRead[]> {
-    return this.request<TaskRead[]>('/tasks/');
+    return this.request<TaskRead[]>('/tasks');
   }
 
   async createTask(data: TaskCreate): Promise<TaskRead> {
-    return this.request<TaskRead>('/tasks/', {
+    return this.request<TaskRead>('/tasks', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -195,6 +245,22 @@ class ApiClient {
 
   async deleteTask(taskId: number): Promise<void> {
     await this.request(`/tasks/${taskId}`, { method: 'DELETE' });
+  }
+
+  // Chat API methods
+  async chatMessage(message: string, conversationId?: number): Promise<ChatResponse> {
+    const userId = this.getUserId();
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    return this.request<ChatResponse>(`/${userId}/chat`, {
+      method: 'POST',
+      body: JSON.stringify({
+        message,
+        conversation_id: conversationId
+      }),
+    });
   }
 }
 

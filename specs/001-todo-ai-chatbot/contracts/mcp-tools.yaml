@@ -15,11 +15,11 @@ tools:
         title:
           type: string
           description: Task title (required)
-          maxLength: 255
+          maxLength: 200
         description:
           type: string
           description: Optional task description
-          maxLength: 4000
+          maxLength: 2000
       required:
         - user_id
         - title

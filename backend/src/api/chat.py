@@ -1,4 +1,5 @@
 from typing import Optional
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -7,6 +8,8 @@ from sqlmodel import Session
 from .dependencies import CurrentUserDep, get_session
 from ..models.conversation import Conversation
 from ..services.chat_service import ChatService
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/api", tags=["chat"])
@@ -24,23 +27,32 @@ async def chat(
     current_user: CurrentUserDep,
     session: Session = Depends(get_session),
 ):
-    if user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
+    try:
+        if user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
 
-    if body.conversation_id is not None and body.conversation_id <= 0:
-        raise HTTPException(status_code=400, detail="conversation_id must be a positive integer")
+        if body.conversation_id is not None and body.conversation_id <= 0:
+            raise HTTPException(status_code=400, detail="conversation_id must be a positive integer")
 
-    if body.conversation_id is not None:
-        convo = session.get(Conversation, body.conversation_id)
-        if convo is None or convo.user_id != current_user.id:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Conversation {body.conversation_id} not found",
-            )
+        if body.conversation_id is not None:
+            convo = session.get(Conversation, body.conversation_id)
+            if convo is None or convo.user_id != current_user.id:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Conversation {body.conversation_id} not found",
+                )
 
-    service = ChatService(session)
-    return await service.chat(
-        user_id=current_user.id,
-        message=body.message,
-        conversation_id=body.conversation_id,
-    )
+        service = ChatService(session)
+        return await service.chat(
+            user_id=current_user.id,
+            message=body.message,
+            conversation_id=body.conversation_id,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Chat endpoint error: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )

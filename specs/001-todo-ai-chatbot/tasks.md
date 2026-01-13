@@ -1,319 +1,132 @@
-# Implementation Tasks: Todo AI Chatbot
+---
+description: "Task list for feature implementation"
+---
 
-**Feature**: 001-todo-ai-chatbot
+# Tasks: Todo AI Chatbot (Frontend + Backend Integration)
+
+**Feature**: `001-todo-ai-chatbot`
 **Branch**: `1-todo-ai-chatbot`
-**Date**: 2026-01-11
-**Status**: Ready for Implementation
+**Input**: Design documents from `/specs/001-todo-ai-chatbot/` (plan.md, spec.md, contracts/)
 
-## Task Overview
+## Scope & Success Criteria
 
-**Total Tasks**: 22
-**User Stories**: 7 (3 P1, 2 P2, 2 Foundation)
-**Phases**: 6 (Setup + Foundational + 4 User Stories + Polish)
+**Surface**: Integrate the existing chatbot backend (`backend/src/api/chat.py`, `backend/src/services/chat_service.py`, `backend/src/mcp/*`) with the Next.js frontend by adding a Chat UI and a typed Chat API client.
 
-| Phase | Tasks | Focus |
-|-------|-------|-------|
-| Phase 1: Setup | T001-T003 | Project initialization |
-| Phase 2: Foundational | T004-T008 | Blocking prerequisites |
-| Phase 3: US1 (Create) | T009-T011 | Task creation via chat |
-| Phase 4: US2 (View) | T012-T014 | Task viewing via chat |
-| Phase 5: US3 (Complete) | T015-T017 | Task completion via chat |
-| Phase 6: US4-US5 (Delete/Update) | T018-T020 | Task deletion and updates |
-| Phase 7: US6-US7 & Polish | T021-T022 | History + isolation + Polish |
+**Success =** an authenticated user can open a `/chat` page, send messages, receive responses, and have conversation continuity via `conversation_id`, while all actions remain scoped to the authenticated user.
 
----
+### Constraints / Invariants
 
-## Phase 1: Setup & Infrastructure
+- Stateless chat requests: no server in-memory session state between requests (FR-013)
+- Message length must be rejected over 1000 chars (FR-019)
+- Token bucket rate limiting is enforced (FR-017)
+- User isolation: user can only access their own tasks & conversations (FR-010)
+- Reuse existing Phase II auth + task CRUD remains intact (FR-014, SC-007)
 
-### Phase Goals
-Initialize project dependencies, create module structure, and prepare development environment.
+### Non-goals
 
-### Independent Test Criteria
-- Backend can start without errors: `uvicorn src.main:app --reload`
-- Frontend can start without errors: `npm run dev`
-- All required packages are installed
+- Voice, multi-language, rich chat formatting (per spec out-of-scope)
+- New auth system changes beyond what’s needed to call the chat endpoint
 
 ---
 
+## Part 1: Completed Backend Implementation
+
+All backend tasks (Phase 1–7) are **completed**. These implement the core Chatbot API, MCP server, and database models.
+
+### Phase 1: Setup & Infrastructure
 - [x] T001 Install backend dependencies (FastAPI, SQLModel, openai-agents, mcp, slowapi) in `backend/requirements.txt`
 - [x] T002 Install frontend dependencies (Next.js, React, TypeScript essentials) in `frontend/package.json`
 - [x] T003 Create backend module structure: `backend/src/mcp/__init__.py`, `backend/src/models/__init__.py`, `backend/src/services/__init__.py`
 
----
-
-## Phase 2: Foundational - Blocking Prerequisites
-
-### Phase Goals
-Implement shared infrastructure that blocks all user stories.
-
-### Independent Test Criteria
-- Database models exist and are importable
-- Chat API endpoint is defined (even if not fully functional)
-- MCP server can start without errors
-- OpenAI Agent can be instantiated
-- Rate limiting middleware is integrated
-
----
-
-### Models & Data Layer
-
+### Phase 2: Foundational - Blocking Prerequisites
 - [x] T004 Create `Conversation` model in `backend/src/models/conversation.py` with user_id, created_at, updated_at
 - [x] T005 Create `Message` model in `backend/src/models/message.py` with conversation_id, user_id, role, content, created_at
-
-### MCP Server Foundation
-
 - [x] T006 [P] Create MCP server entry point at `backend/src/mcp/server.py` using FastMCP
 - [x] T007 [P] Create MCP tools module at `backend/src/mcp/tools.py` with placeholder function decorators for add_task, list_tasks, complete_task, delete_task, update_task
-
-### Chat Service & API Foundation
-
 - [x] T008 Create `ChatService` class in `backend/src/services/chat_service.py` with async chat() method that accepts user_id, message, and optional conversation_id
 
----
-
-## Phase 3: User Story 1 - Create Tasks via Conversation (P1)
-
-### Story Goal
-Users can create new tasks by sending natural language messages to the chatbot.
-
-### User Story Mapping
-- **User Story**: Create Tasks via Conversation
-- **Acceptance**: User sends "Add a task to buy groceries" → task is created and assistant confirms
-- **MCP Tool**: `add_task`
-
-### Independent Test Criteria
-- Send chat message "Add task to buy milk"
-- Verify task is created in database
-- Verify assistant response confirms creation
-- Verify task belongs to authenticated user
-- Verify unauthenticated request is rejected
-
----
-
+### Phase 3: User Story 1 - Create Tasks via Conversation (P1)
 - [x] T009 [US1] Implement `add_task` MCP tool in `backend/src/mcp/tools.py` that creates task via database
 - [x] T010 [US1] Integrate OpenAI Agent with `add_task` tool in `backend/src/services/chat_service.py`
-- [x] T011 [US1] Create `POST /api/{user_id}/chat` endpoint in `backend/src/api/chat.py` that calls ChatService and returns response (validates user_id matches authenticated user)
+- [x] T011 [US1] Create `POST /api/{user_id}/chat` endpoint in `backend/src/api/chat.py` that calls ChatService and returns response
 
----
-
-## Phase 4: User Story 2 - View Tasks via Conversation (P1)
-
-### Story Goal
-Users can view their tasks using natural language queries like "Show me all my tasks" or "What's pending?"
-
-### User Story Mapping
-- **User Story**: View Tasks via Conversation
-- **Acceptance**: User sends "Show me all my tasks" → all tasks are returned with details
-- **MCP Tool**: `list_tasks`
-
-### Independent Test Criteria
-- Send "What are my tasks?"
-- Verify all user's tasks are returned
-- Verify non-user's tasks are not returned
-- Verify completion status is included
-- Verify filtering works (pending/completed)
-
----
-
+### Phase 4: User Story 2 - View Tasks via Conversation (P1)
 - [x] T012 [US2] Implement `list_tasks` MCP tool in `backend/src/mcp/tools.py` with status filtering (all, pending, completed)
 - [x] T013 [US2] Update OpenAI Agent instructions in `backend/src/services/chat_service.py` to handle list queries
 - [x] T014 [US2] Add conversation history retrieval in `backend/src/services/chat_service.py` to populate chat context
 
----
-
-## Phase 5: User Story 3 - Complete Tasks via Conversation (P1)
-
-### Story Goal
-Users can mark tasks as complete using natural language like "Mark task 3 as done"
-
-### User Story Mapping
-- **User Story**: Complete Tasks via Conversation
-- **Acceptance**: User sends "Mark task 3 as complete" → task marked complete and assistant confirms
-- **MCP Tool**: `complete_task`
-
-### Independent Test Criteria
-- Send "Mark task 5 as complete"
-- Verify task.completed = true
-- Verify assistant confirms
-- Verify non-owner cannot complete task
-- Verify cannot complete non-existent task
-
----
-
+### Phase 5: User Story 3 - Complete Tasks via Conversation (P1)
 - [x] T015 [US3] Implement `complete_task` MCP tool in `backend/src/mcp/tools.py`
 - [x] T016 [US3] Add task completion logic to OpenAI Agent instructions
 - [x] T017 [US3] Store assistant response in Message table in `backend/src/services/chat_service.py`
 
----
-
-## Phase 6: User Stories 4 & 5 - Delete and Update Tasks (P2)
-
-### Story Goals
-- **US4**: Delete tasks via natural language
-- **US5**: Update task details via natural language
-
-### User Story Mapping
-- **US4**: Delete Tasks via Conversation
-- **US5**: Update Tasks via Conversation
-- **MCP Tools**: `delete_task`, `update_task`
-
-### Independent Test Criteria (Both Stories)
-- Delete: Send "Delete task 5" → task removed and assistant confirms
-- Update: Send "Change task 1 to 'New title'" → task updated and assistant confirms
-- Both respect user isolation
-- Both handle non-existent tasks gracefully
-
----
-
+### Phase 6: User Stories 4 & 5 - Delete and Update Tasks (P2)
 - [x] T018 [P] [US4] Implement `delete_task` MCP tool in `backend/src/mcp/tools.py`
 - [x] T019 [P] [US5] Implement `update_task` MCP tool in `backend/src/mcp/tools.py` with title and description updates
 - [x] T020 [US4/US5] Add delete and update logic to OpenAI Agent instructions
 
----
-
-## Phase 7: User Stories 6 & 7 + Polish
-
-### Story Goals
-- **US6**: Maintain conversation context across sessions
-- **US7**: Enforce user data isolation
-
-### User Story Mapping
-- **US6**: Maintain Conversation Context
-- **US7**: User Data Isolation
-- **Foundation**: Rate limiting, error handling, validation
-
-### Independent Test Criteria (US6)
-- Send multiple messages in conversation
-- Retrieve conversation by ID
-- Verify assistant remembers context
-- Verify history is persisted
-
-### Independent Test Criteria (US7)
-- User A cannot view User B's tasks
-- User A cannot complete User B's tasks
-- Unauthenticated requests are rejected
-- User_id validation enforced on all operations
-
----
-
-- [x] T021 [US6/US7] Implement user_id validation on all API endpoints in `backend/src/api/chat.py` (also validates conversation ownership)
+### Phase 7: User Stories 6 & 7 + Polish
+- [x] T021 [US6/US7] Implement user_id validation on all API endpoints in `backend/src/api/chat.py`
 - [x] T022 [US6] Implement token bucket rate limiting middleware in `backend/src/core/middleware.py` with configurable limits
+
+---
+
+## Part 2: Frontend Integration Tasks (Pending)
+
+**Purpose**: Connect the completed backend to the Next.js frontend UI.
+
+### Phase 8: Frontend Setup & Alignment
+- [x] T023 Confirm `frontend/.env.local` includes `NEXT_PUBLIC_API_URL` pointing to backend `/api` base (e.g., `http://localhost:8000/api`) (frontend/.env.local)
+- [x] T024 Confirm backend CORS allows the frontend origin (localhost + prod) (backend/src/main.py)
+- [x] T025 Align `user_id` type across backend and contracts (int vs string) by updating `specs/001-todo-ai-chatbot/contracts/chat-api.yaml`
+- [x] T026 Align MCP tool schema constraints with existing Task model constraints (e.g., title/description max lengths) by updating `specs/001-todo-ai-chatbot/contracts/mcp-tools.yaml`
+- [x] T027 Implement a frontend-safe way to obtain the current authenticated user id for chat calls (decode JWT `sub` from `access_token` cookie) in `frontend/src/lib/api.ts`
+- [x] T028 Add Chat API method(s) to frontend client (e.g., `api.chatMessage(...)`) in `frontend/src/lib/api.ts` or a new `frontend/src/lib/chat.ts`
+
+### Phase 9: Chat UI Implementation (MVP)
+- [x] T029 [US1] Add `/chat` route and base page shell in `frontend/src/app/chat/page.tsx`
+- [x] T030 [US1] Create chat UI container and message list component in `frontend/src/app/chat/ChatComponent.tsx`
+- [x] T031 [US1] Create input component with submit + disabled/loading states in `frontend/src/components/chat/ChatInput.tsx`
+- [x] T032 [US1] Create message bubble component (user vs assistant) in `frontend/src/components/chat/ChatMessage.tsx`
+- [x] T033 [US1] Wire UI → Chat API call and append messages to local state in `frontend/src/app/chat/ChatComponent.tsx`
+- [x] T034 [US1] Persist `conversation_id` client-side (React state + localStorage) so subsequent messages continue same conversation in `frontend/src/app/chat/ChatComponent.tsx`
+
+### Phase 10: Advanced Chat Features (US2-US6)
+- [x] T035 [US2] Ensure chat UI renders multi-line assistant responses cleanly (preserve newlines) in `frontend/src/components/chat/ChatMessage.tsx`
+- [x] T036 [US2] Add a "Go to dashboard" affordance (link/button) near chat responses to cross-check tasks in `frontend/src/app/chat/page.tsx`
+- [x] T037 [US3] Ensure chat UI supports task-id based commands ergonomically (e.g., placeholder text/help text) in `frontend/src/components/chat/ChatInput.tsx`
+- [x] T038 [US4] Add a basic "Are you sure?" client-side confirmation flow for explicit delete commands (optional UX guard) in `frontend/src/app/chat/ChatComponent.tsx`
+- [x] T039 [US5] Ensure update-related responses are clearly surfaced in chat history (no UI changes beyond rendering) in `frontend/src/components/chat/ChatMessage.tsx`
+- [x] T040 [US6] Add lightweight client-side conversation resumption (restore conversation_id + in-memory transcript from localStorage) in `frontend/src/app/chat/ChatComponent.tsx`
+
+### Phase 11: Security & Polish (US7 + Cross-cutting)
+- [x] T041 [US7] Add `/chat` to route protection in `frontend/src/middleware.ts` matcher + auth checks
+- [x] T042 [US7] Add "Chat" link to authenticated navbar so only logged-in users can reach it easily (frontend/src/components/dashboard/Navbar.tsx)
+- [x] T043 Add loading + error UI for chat request failures (401/403/429/500) in `frontend/src/app/chat/ChatComponent.tsx`
+- [x] T044 Enforce client-side message length <= 1000 before sending and show clear error (frontend/src/components/chat/ChatInput.tsx`
+
+**All tasks completed!**
 
 ---
 
 ## Dependencies & Execution Order
 
-### Critical Path (Must Complete Sequentially)
-1. **Phase 1** (Setup) → All phases
-2. **Phase 2** (Foundational) → All user story phases
-3. **Phase 3** (US1 Create) → Enables Phase 4-5 testing
-4. **Phase 4** (US2 View) → Recommended before Phase 5
-5. **Phase 5** (US3 Complete) → Independent
-6. **Phase 6** (US4/US5 Delete/Update) → Independent
-7. **Phase 7** (US6/US7) → Final layer
+### Phase Dependencies
+- Part 1 (Backend) is **Done**.
+- Part 2 (Frontend) tasks depend on Part 1 being complete.
+- T023–T028 (Setup/Auth/API) block UI implementation.
+- T029–T034 (MVP UI) block advanced features T035–T040.
 
-### Parallelizable Tasks
-- **T006 + T007**: Both MCP components can be written in parallel
-- **T018 + T019**: Delete and Update tools can be written in parallel
-- **Phase 6 tasks** can start once Phase 2 is complete
-
-### Suggested Execution
-```
-Phase 1: T001, T002, T003 (sequential)
-Phase 2: T004-T005, then T006+T007 parallel, then T008 (sequential)
-Phase 3: T009, T010, T011 (sequential)
-Phase 4: T012, T013, T014 (sequential)
-Phase 5: T015, T016, T017 (sequential)
-Phase 6: T018+T019 parallel, then T020 (sequential)
-Phase 7: T021, T022 (sequential)
-```
+### Parallel Opportunities
+- After T028 (API Client):
+  - Developer A: Chat UI components (T031, T032)
+  - Developer B: Chat logic & state (T030, T033, T034)
+  - Developer C: Route protection & Navbar (T041, T042)
 
 ---
 
-## Minimum Viable Product (MVP) Scope
+## Suggested MVP Scope
 
-### MVP = Phase 1 + Phase 2 + Phase 3
-
-**Deliverables**:
-- Users can send chat message "Add task to..."
-- Task is created and stored
-- Assistant confirms creation
-- Full auth and user isolation
-
-**Benefits**:
-- Demonstrates core value (create tasks conversationally)
-- Enables end-to-end testing
-- Can be extended with other operations
-
-**Time**: TBD
-
----
-
-## Implementation Strategy
-
-### Architecture Pattern
-```
-Chat Request
-    ↓
-[Authentication Check]
-    ↓
-[Retrieve Conversation History]
-    ↓
-[OpenAI Agent w/ MCP Tools]
-    ↓
-[Tool Execution] → [MCP Tool]
-                      ↓
-                 [Database Operation]
-                      ↓
-[Store Response in Message Table]
-    ↓
-[Return to User]
-```
-
-### Key Principles
-1. **Stateless Requests**: No in-memory state between requests
-2. **User Isolation**: Every query filters by authenticated user_id
-3. **Graceful Degradation**: OpenAI failures return friendly message
-4. **Rate Limiting**: Token bucket per user
-5. **Immutable History**: Messages never updated, only created
-
-### Code Organization
-- **Models**: Data structures (Conversation, Message)
-- **MCP Tools**: Individual task operations (add_task, list_tasks, etc.)
-- **ChatService**: Orchestration layer (agent + tool invocation + history)
-- **API Layer**: HTTP endpoints (authentication + validation)
-
----
-
-## Acceptance Criteria Template
-
-For each task, verify:
-- [ ] Code follows PEP 8 (Python) / ESLint (TypeScript)
-- [ ] No hardcoded secrets or API keys
-- [ ] Appropriate error handling
-- [ ] User isolation enforced (where applicable)
-- [ ] Code is documented with docstrings
-
----
-
-## Risk Areas & Mitigations
-
-| Risk | Mitigation |
-|------|-----------|
-| OpenAI API unavailable | Graceful degradation with fallback message |
-| Rate limit exceeded | Token bucket limiting + user-friendly error |
-| Long message handling | Reject >1000 chars with clear error |
-| Concurrent task edits | Last-write-wins strategy |
-| User data leakage | Validate user_id on every query |
-
----
-
-## Next Steps
-
-1. Start with Phase 1 (Setup) - 30 minutes
-2. Complete Phase 2 (Foundational) - 1-2 hours
-3. Build Phase 3 (MVP) - 1 hour
-4. Test end-to-end
-5. Continue with remaining phases
-
-**Recommended MVP Completion Target**: Same day as Phase 2
+MVP = Part 1 (Completed) + Phase 8 + Phase 9 + Phase 11 (Security):
+- Backend logic is ready.
+- Frontend needs API client + Basic Chat UI + Route Protection.

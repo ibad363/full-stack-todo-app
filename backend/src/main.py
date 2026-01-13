@@ -136,16 +136,27 @@ async def add_private_network_access_header(request, call_next):
         request.headers.get("access-control-request-private-network") == "true"
     )
     
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.error(f"Error in request pipeline: {str(e)}", exc_info=True)
+        # Return 500 with CORS headers on error
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
+        )
     
-    # Force add the header for all requests from Vercel to localhost
+    # Always add CORS headers
+    origin = request.headers.get("origin")
+    if origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    # Add Private Network Access header if needed
     if is_pna_preflight or request.headers.get("access-control-request-private-network") == "true":
         response.headers["Access-Control-Allow-Private-Network"] = "true"
-        # Force CORS headers if missing (Starlette CORSMiddleware sometimes skips them)
-        origin = request.headers.get("origin")
-        if origin in origins:
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
             
     return response
 

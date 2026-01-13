@@ -30,9 +30,9 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
           description: User identifier (must match authenticated user)
-          example: "user_abc123"
+          example: 123
       requestBody:
         required: true
         content:
