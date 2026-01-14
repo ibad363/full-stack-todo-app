@@ -43,6 +43,7 @@ export interface TaskUpdate {
 export interface ChatRequest {
   message: string;
   conversation_id?: number;
+  model?: string;
 }
 
 export interface ChatToolCall {
@@ -248,7 +249,7 @@ class ApiClient {
   }
 
   // Chat API methods
-  async chatMessage(message: string, conversationId?: number): Promise<ChatResponse> {
+  async chatMessage(message: string, conversationId?: number, model?: string): Promise<ChatResponse> {
     const userId = this.getUserId();
     if (!userId) {
       throw new Error('User not authenticated');
@@ -258,7 +259,8 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({
         message,
-        conversation_id: conversationId
+        conversation_id: conversationId,
+        model
       }),
     });
   }

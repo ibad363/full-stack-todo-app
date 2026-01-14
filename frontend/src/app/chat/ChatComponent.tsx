@@ -28,22 +28,39 @@ export function ChatComponent() {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   // T043: Track error state for better UX
   const [lastError, setLastError] = useState<{ code: string; message: string } | null>(null);
+  // Model selection state
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load conversation ID from local storage on mount
+  // Available models
+  const availableModels = [
+    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+    { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+  ];
+
+  // Load conversation ID and model from local storage on mount
   useEffect(() => {
     const savedConversationId = localStorage.getItem('chat_conversation_id');
     if (savedConversationId) {
       setConversationId(parseInt(savedConversationId, 10));
     }
+    const savedModel = localStorage.getItem('chat_selected_model');
+    if (savedModel) {
+      setSelectedModel(savedModel);
+    }
   }, []);
 
-  // Persist conversation ID to local storage
+  // Persist conversation ID and model to local storage
   useEffect(() => {
     if (conversationId) {
       localStorage.setItem('chat_conversation_id', conversationId.toString());
     }
   }, [conversationId]);
+
+  useEffect(() => {
+    localStorage.setItem('chat_selected_model', selectedModel);
+  }, [selectedModel]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -133,7 +150,7 @@ export function ChatComponent() {
     setLastError(null);
 
     try {
-      const response: ChatResponse = await api.chatMessage(content, conversationId);
+      const response: ChatResponse = await api.chatMessage(content, conversationId, selectedModel);
 
       if (response.conversation_id) {
         setConversationId(response.conversation_id);
@@ -295,7 +312,25 @@ export function ChatComponent() {
       )}
 
       {/* Input Area */}
-      <div className="p-4 bg-white/50 border-t border-secondary-100 backdrop-blur-sm">
+      <div className="p-4 bg-white/50 border-t border-secondary-100 backdrop-blur-sm space-y-3">
+        {/* Model Selector */}
+        <div className="flex items-center gap-3">
+          <label htmlFor="model-select" className="text-sm font-medium text-secondary-700">
+            Model:
+          </label>
+          <select
+            id="model-select"
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="flex-1 px-3 py-2 text-sm bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+          >
+            {availableModels.map((model) => (
+              <option key={model.value} value={model.value}>
+                {model.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
     </Card>

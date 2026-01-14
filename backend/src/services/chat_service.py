@@ -22,7 +22,7 @@ class ChatService:
     def __init__(self, session: Session):
         self._session = session
 
-    def _build_model(self) -> OpenAIChatCompletionsModel:
+    def _build_model(self, model: str) -> OpenAIChatCompletionsModel:
         # Gemini via OpenAI-compatible endpoint
         external_client = AsyncOpenAI(
             api_key=settings.GEMINI_API_KEY or "",
@@ -30,12 +30,12 @@ class ChatService:
         )
 
         return OpenAIChatCompletionsModel(
-            model=settings.GEMINI_MODEL,
+            model=model,
             openai_client=external_client,
         )
 
-    def _build_agent(self, user_id: int) -> Agent:
-        llm_model = self._build_model()
+    def _build_agent(self, user_id: int, model: str) -> Agent:
+        llm_model = self._build_model(model)
 
         @function_tool
         async def create_task(title: str, description: Optional[str] = None, priority: str = "medium") -> str:
@@ -140,7 +140,11 @@ class ChatService:
         )
         return list(self._session.exec(stmt).all())
 
-    async def chat(self, user_id: int, message: str, conversation_id: Optional[int] = None) -> dict:
+    async def chat(self, user_id: int, message: str, conversation_id: Optional[int] = None, model: Optional[str] = None) -> dict:
+        # Use default model if not provided
+        if model is None:
+            model = settings.GEMINI_DEFAULT_MODEL
+        
         convo = self._get_or_create_conversation(user_id=user_id, conversation_id=conversation_id)
 
         user_msg = Message(
@@ -156,7 +160,7 @@ class ChatService:
         history = self._load_history(conversation_id=convo.id)
         history_text = "\n".join([f"{m.role}: {m.content}" for m in history[-20:]])
 
-        agent = self._build_agent(user_id=user_id)
+        agent = self._build_agent(user_id=user_id, model=model)
 
         prompt = (
             "Conversation so far:\n"

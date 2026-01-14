@@ -8,6 +8,7 @@ from sqlmodel import Session
 from .dependencies import CurrentUserDep, get_session
 from ..models.conversation import Conversation
 from ..services.chat_service import ChatService
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/api", tags=["chat"])
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
     conversation_id: Optional[int] = None
+    model: Optional[str] = Field(default=None, description="Gemini model to use")
 
 
 @router.post("/{user_id}/chat")
@@ -42,11 +44,20 @@ async def chat(
                     detail=f"Conversation {body.conversation_id} not found",
                 )
 
+        # Validate model if provided
+        model = body.model or settings.GEMINI_DEFAULT_MODEL
+        if model not in settings.ALLOWED_GEMINI_MODELS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid model. Allowed models: {', '.join(settings.ALLOWED_GEMINI_MODELS)}"
+            )
+
         service = ChatService(session)
         return await service.chat(
             user_id=current_user.id,
             message=body.message,
             conversation_id=body.conversation_id,
+            model=model,
         )
     except HTTPException:
         raise

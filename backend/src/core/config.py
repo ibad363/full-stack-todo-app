@@ -19,7 +19,12 @@ class Settings(BaseSettings):
 
     # AI (Gemini via OpenAI-compatible endpoint)
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-2.5-flash-lite"
+    GEMINI_DEFAULT_MODEL: str = "gemini-2.5-flash"
+    ALLOWED_GEMINI_MODELS: List[str] = [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash"
+    ]
 
     # Rate limiting (token bucket)
     RATE_LIMIT_ENABLED: bool = True
