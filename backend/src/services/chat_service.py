@@ -9,7 +9,13 @@ from sqlmodel import Session, select
 from ..core.config import settings
 from ..models.conversation import Conversation
 from ..models.message import Message
-from ..mcp.tools import add_task, list_tasks, complete_task, delete_task, update_task
+from ..mcp.task_operations import (
+    add_task_operation,
+    list_tasks_operation,
+    complete_task_operation,
+    delete_task_operation,
+    update_task_operation,
+)
 
 
 class ChatService:
@@ -35,9 +41,9 @@ class ChatService:
         async def create_task(title: str, description: Optional[str] = None, priority: str = "medium") -> str:
             """Create a task for the current authenticated user."""
 
-            res = await add_task(
-                title=title,
+            res = await add_task_operation(
                 user_id=user_id,
+                title=title,
                 description=description,
                 priority=priority,
             )
@@ -57,7 +63,7 @@ class ChatService:
                 A formatted list of tasks.
             """
 
-            items = await list_tasks(user_id=user_id, status=status)
+            items = await list_tasks_operation(user_id=user_id, status=status)
 
             if not items:
                 if status == "pending":
@@ -78,14 +84,14 @@ class ChatService:
         async def mark_task_complete(task_id: int) -> str:
             """Mark one of the current user's tasks as completed by numeric task_id."""
 
-            res = await complete_task(task_id=task_id, user_id=user_id)
+            res = await complete_task_operation(task_id=task_id, user_id=user_id)
             return f"Marked task #{res.get('task_id')} as completed: {res.get('title')}"
 
         @function_tool
         async def remove_task(task_id: int) -> str:
             """Delete one of the current user's tasks by numeric task_id."""
 
-            res = await delete_task(task_id=task_id, user_id=user_id)
+            res = await delete_task_operation(task_id=task_id, user_id=user_id)
             return f"Deleted task #{res.get('task_id')}: {res.get('title')}"
 
         @function_tool
@@ -95,7 +101,7 @@ class ChatService:
             Provide at least one of: title, description.
             """
 
-            res = await update_task(task_id=task_id, user_id=user_id, title=title, description=description)
+            res = await update_task_operation(task_id=task_id, user_id=user_id, title=title, description=description)
             return f"Updated task #{res.get('task_id')}: {res.get('title')}"
 
         return Agent(

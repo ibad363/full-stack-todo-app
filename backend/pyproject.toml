@@ -19,6 +19,9 @@ dependencies = [
     "slowapi>=0.1.9",
     "sqlmodel>=0.0.31",
     "uvicorn[standard]>=0.40.0",
+    "openai-agents>=0.1.0",
+    "mcp>=0.1.0",
+    "fastmcp>=0.4.1",
 ]
 
 [tool.pytest.ini_options]
