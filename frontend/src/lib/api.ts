@@ -60,6 +60,25 @@ export interface ChatResponse {
   tool_calls: ChatToolCall[];
 }
 
+// Conversation interfaces
+export interface ConversationWithPreview {
+  id: number;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+  last_message: string | null;
+}
+
+export interface MessageRead {
+  id: number;
+  conversation_id: number;
+  user_id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
 class ApiClient {
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
@@ -263,6 +282,19 @@ class ApiClient {
         model
       }),
     });
+  }
+
+  // Conversation API methods
+  async listConversations(): Promise<ConversationWithPreview[]> {
+    return this.request<ConversationWithPreview[]>('/conversations');
+  }
+
+  async getConversationMessages(conversationId: number): Promise<MessageRead[]> {
+    return this.request<MessageRead[]>(`/conversations/${conversationId}/messages`);
+  }
+
+  async deleteConversation(conversationId: number): Promise<void> {
+    await this.request(`/conversations/${conversationId}`, { method: 'DELETE' });
   }
 }
 

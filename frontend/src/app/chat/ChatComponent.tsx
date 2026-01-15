@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatMessage } from '@/components/chat/ChatMessage';
-import { api, ChatResponse } from '@/lib/api';
+import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
+import { api, ChatResponse, ConversationWithPreview } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { AlertTriangle, RefreshCw, X } from 'lucide-react';
@@ -30,6 +31,9 @@ export function ChatComponent() {
   const [lastError, setLastError] = useState<{ code: string; message: string } | null>(null);
   // Model selection state
   const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash');
+  // Conversation list state
+  const [conversations, setConversations] = useState<ConversationWithPreview[]>([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Available models
@@ -39,7 +43,7 @@ export function ChatComponent() {
     { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
   ];
 
-  // Load conversation ID and model from local storage on mount
+  // Load conversation ID, model, and conversation list from storage/API on mount
   useEffect(() => {
     const savedConversationId = localStorage.getItem('chat_conversation_id');
     if (savedConversationId) {
@@ -49,6 +53,8 @@ export function ChatComponent() {
     if (savedModel) {
       setSelectedModel(savedModel);
     }
+    // Load conversations
+    loadConversations();
   }, []);
 
   // Persist conversation ID and model to local storage
@@ -66,6 +72,66 @@ export function ChatComponent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Load conversations from API
+  const loadConversations = async () => {
+    setIsLoadingConversations(true);
+    try {
+      const convos = await api.listConversations();
+      setConversations(convos);
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
+    } finally {
+      setIsLoadingConversations(false);
+    }
+  };
+
+  // Load messages for a conversation
+  const loadConversationMessages = async (convId: number) => {
+    try {
+      const msgs = await api.getConversationMessages(convId);
+      setMessages(
+        msgs.map((msg) => ({
+          id: msg.id.toString(),
+          role: msg.role,
+          content: msg.content,
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+    }
+  };
+
+  // Handle conversation selection
+  const handleSelectConversation = async (convId: number) => {
+    setConversationId(convId);
+    localStorage.setItem('chat_conversation_id', convId.toString());
+    await loadConversationMessages(convId);
+  };
+
+  // Handle new conversation
+  const handleNewConversation = () => {
+    setConversationId(undefined);
+    setMessages([]);
+    localStorage.removeItem('chat_conversation_id');
+  };
+
+  // Handle delete conversation
+  const handleDeleteConversation = async (convId: number) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    try {
+      await api.deleteConversation(convId);
+      // If deleting active conversation, start new one
+      if (convId === conversationId) {
+        handleNewConversation();
+      }
+      // Reload conversations
+      await loadConversations();
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
+      alert('Failed to delete conversation');
+    }
+  };
 
   // T038: Check if message suggests a delete operation
   const suggestsDelete = (content: string): boolean => {
@@ -163,6 +229,9 @@ export function ChatComponent() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Reload conversations to update the list
+      await loadConversations();
     } catch (error: any) {
       console.error('Failed to send message:', error);
 
@@ -215,124 +284,139 @@ export function ChatComponent() {
   };
 
   return (
-    <Card className="flex flex-col h-full bg-white/80 backdrop-blur-xl border-white/20 shadow-2xl overflow-hidden rounded-[2rem]">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-accent-100 rounded-3xl flex items-center justify-center mb-6 animate-pulse-slow">
-              <span className="text-4xl">👋</span>
-            </div>
-            <h3 className="text-2xl font-bold text-secondary-800 mb-2">Hello!</h3>
-            <p className="text-secondary-500 max-w-sm">
-              I'm your AI assistant. Ask me to create tasks, list your pending items, or help you organize your day.
-            </p>
-          </div>
-        ) : (
-          messages.map((msg) => (
-            <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
-          ))
-        )}
-
-        {/* T043: Show loading indicator during API call */}
-        {isLoading && (
-          <div className="flex gap-4 p-4 rounded-2xl bg-primary-50/50 mr-12 animate-pulse">
-            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-              <span className="text-primary-600">AI</span>
-            </div>
-            <div className="flex-1 space-y-2">
-              <p className="text-xs font-semibold text-secondary-500 uppercase">Assistant</p>
-              <div className="flex items-center gap-2 text-secondary-500">
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                <span>Thinking...</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
+    <div className="flex h-full gap-4">
+      {/* Conversation Sidebar */}
+      <div className="w-80 flex-shrink-0">
+        <ConversationSidebar
+          conversations={conversations}
+          activeConversationId={conversationId}
+          onSelectConversation={handleSelectConversation}
+          onNewConversation={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
+          isLoading={isLoadingConversations}
+        />
       </div>
 
-      {/* T038: Delete confirmation dialog */}
-      {pendingDelete && (
-        <div className="p-4 bg-warning-50 border-t border-warning-200">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-warning-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-warning-800">
-                Delete {pendingDelete.taskTitle}?
+      {/* Chat Area */}
+      <Card className="flex flex-col flex-1 bg-white/80 backdrop-blur-xl border-white/20 shadow-2xl overflow-hidden rounded-[2rem]">
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-accent-100 rounded-3xl flex items-center justify-center mb-6 animate-pulse-slow">
+                <span className="text-4xl">👋</span>
+              </div>
+              <h3 className="text-2xl font-bold text-secondary-800 mb-2">Hello!</h3>
+              <p className="text-secondary-500 max-w-sm">
+                I'm your AI assistant. Ask me to create tasks, list your pending items, or help you organize your day.
               </p>
-              <p className="text-sm text-warning-600 mt-1">
-                This action cannot be undone. Are you sure?
-              </p>
-              <div className="flex gap-2 mt-3">
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={confirmDelete}
-                >
-                  Yes, Delete
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={cancelDelete}
-                >
-                  Cancel
-                </Button>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+            ))
+          )}
+
+          {/* T043: Show loading indicator during API call */}
+          {isLoading && (
+            <div className="flex gap-4 p-4 rounded-2xl bg-primary-50/50 mr-12 animate-pulse">
+              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                <span className="text-primary-600">AI</span>
+              </div>
+              <div className="flex-1 space-y-2">
+                <p className="text-xs font-semibold text-secondary-500 uppercase">Assistant</p>
+                <div className="flex items-center gap-2 text-secondary-500">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Thinking...</span>
+                </div>
               </div>
             </div>
-            <button
-              onClick={cancelDelete}
-              className="text-warning-600 hover:text-warning-800"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* T043: Show error banner if there was an error */}
-      {lastError && lastError.code !== 'UNAUTHORIZED' && (
-        <div className="p-3 bg-danger-50 border-t border-danger-200">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-danger-700">
-              {lastError.message}
-            </p>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleRetry}
-              className="text-danger-600 hover:text-danger-700"
-            >
-              Retry
-            </Button>
-          </div>
+          <div ref={messagesEndRef} />
         </div>
-      )}
 
-      {/* Input Area */}
-      <div className="p-4 bg-white/50 border-t border-secondary-100 backdrop-blur-sm space-y-3">
-        {/* Model Selector */}
-        <div className="flex items-center gap-3">
-          <label htmlFor="model-select" className="text-sm font-medium text-secondary-700">
-            Model:
-          </label>
-          <select
-            id="model-select"
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-          >
-            {availableModels.map((model) => (
-              <option key={model.value} value={model.value}>
-                {model.label}
-              </option>
-            ))}
-          </select>
+        {/* T038: Delete confirmation dialog */}
+        {pendingDelete && (
+          <div className="p-4 bg-warning-50 border-t border-warning-200">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-warning-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium text-warning-800">
+                  Delete {pendingDelete.taskTitle}?
+                </p>
+                <p className="text-sm text-warning-600 mt-1">
+                  This action cannot be undone. Are you sure?
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={confirmDelete}
+                  >
+                    Yes, Delete
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={cancelDelete}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+              <button
+                onClick={cancelDelete}
+                className="text-warning-600 hover:text-warning-800"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* T043: Show error banner if there was an error */}
+        {lastError && lastError.code !== 'UNAUTHORIZED' && (
+          <div className="p-3 bg-danger-50 border-t border-danger-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-danger-700">
+                {lastError.message}
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleRetry}
+                className="text-danger-600 hover:text-danger-700"
+              >
+                Retry
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Input Area */}
+        <div className="p-4 bg-white/50 border-t border-secondary-100 backdrop-blur-sm space-y-3">
+          {/* Model Selector */}
+          <div className="flex items-center gap-3">
+            <label htmlFor="model-select" className="text-sm font-medium text-secondary-700">
+              Model:
+            </label>
+            <select
+              id="model-select"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="flex-1 px-3 py-2 text-sm bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            >
+              {availableModels.map((model) => (
+                <option key={model.value} value={model.value}>
+                  {model.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
         </div>
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }

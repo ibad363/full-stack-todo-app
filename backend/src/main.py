@@ -11,6 +11,7 @@ from src.core.config import settings
 from src.core.middleware import TokenBucketRateLimiter, get_client_key
 from src.api import auth, tasks
 from src.api import chat
+from src.api import conversations
 from src.models import User, Task, Conversation, Message  # Ensure models are registered
 
 # main.py
@@ -164,6 +165,7 @@ async def add_private_network_access_header(request, call_next):
 app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(chat.router)
+app.include_router(conversations.router)
 
 @app.get("/api/health")
 def health_check():
