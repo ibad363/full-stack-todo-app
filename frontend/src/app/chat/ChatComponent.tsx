@@ -3,10 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
+import { ModelSelector } from '@/components/chat/ModelSelector';
 import { api, ChatResponse, ConversationWithPreview } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { AlertTriangle, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, RefreshCw, X, MessageSquare } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -34,6 +35,7 @@ export function ChatComponent() {
   // Conversation list state
   const [conversations, setConversations] = useState<ConversationWithPreview[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const [currentConversationTitle, setCurrentConversationTitle] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Available models
@@ -45,16 +47,29 @@ export function ChatComponent() {
 
   // Load conversation ID, model, and conversation list from storage/API on mount
   useEffect(() => {
-    const savedConversationId = localStorage.getItem('chat_conversation_id');
-    if (savedConversationId) {
-      setConversationId(parseInt(savedConversationId, 10));
-    }
-    const savedModel = localStorage.getItem('chat_selected_model');
-    if (savedModel) {
-      setSelectedModel(savedModel);
-    }
-    // Load conversations
-    loadConversations();
+    const initialize = async () => {
+      const savedConversationId = localStorage.getItem('chat_conversation_id');
+      const savedModel = localStorage.getItem('chat_selected_model');
+
+      if (savedModel) {
+        setSelectedModel(savedModel);
+      }
+
+      // Load conversations first to have the list available
+      const convos = await loadConversations();
+
+      if (savedConversationId && convos) {
+        const id = parseInt(savedConversationId, 10);
+        setConversationId(id);
+        const conv = convos.find(c => c.id === id);
+        if (conv) {
+          setCurrentConversationTitle(conv.title || null);
+          await loadConversationMessages(id);
+        }
+      }
+    };
+
+    initialize();
   }, []);
 
   // Persist conversation ID and model to local storage
@@ -79,8 +94,10 @@ export function ChatComponent() {
     try {
       const convos = await api.listConversations();
       setConversations(convos);
+      return convos;
     } catch (error) {
       console.error('Failed to load conversations:', error);
+      return null;
     } finally {
       setIsLoadingConversations(false);
     }
@@ -107,12 +124,16 @@ export function ChatComponent() {
     setConversationId(convId);
     localStorage.setItem('chat_conversation_id', convId.toString());
     await loadConversationMessages(convId);
+    // Update conversation title
+    const conv = conversations.find(c => c.id === convId);
+    setCurrentConversationTitle(conv?.title || null);
   };
 
   // Handle new conversation
   const handleNewConversation = () => {
     setConversationId(undefined);
     setMessages([]);
+    setCurrentConversationTitle(null);
     localStorage.removeItem('chat_conversation_id');
   };
 
@@ -298,17 +319,39 @@ export function ChatComponent() {
       </div>
 
       {/* Chat Area */}
-      <Card className="flex flex-col flex-1 bg-white/80 backdrop-blur-xl border-white/20 shadow-2xl overflow-hidden rounded-[2rem]">
+      <Card className="flex flex-col flex-1 bg-white/95 dark:bg-secondary-900/95 border-2 border-white dark:border-secondary-800 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-2xl overflow-hidden rounded-[3.5rem] rounded-tl-xl ring-1 ring-secondary-100 dark:ring-secondary-800">
+        {/* Chat Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 dark:border-secondary-700 bg-gradient-to-r from-primary-50/50 to-accent-50/50 dark:from-primary-900/10 dark:to-accent-900/10">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-xl">
+              <MessageSquare className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-secondary-900 dark:text-secondary-100">
+                {currentConversationTitle || 'New Conversation'}
+              </h2>
+              <p className="text-xs text-secondary-500 dark:text-secondary-400">
+                AI-powered task assistant
+              </p>
+            </div>
+          </div>
+          <ModelSelector
+            models={availableModels}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+          />
+        </div>
+
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-secondary-50/10 dark:bg-secondary-900/40 custom-scrollbar">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-accent-100 rounded-3xl flex items-center justify-center mb-6 animate-pulse-slow">
-                <span className="text-4xl">👋</span>
+              <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/30 dark:to-accent-900/30 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-inner ring-4 ring-white dark:ring-secondary-800 animate-pulse-slow">
+                <span className="text-5xl">✨</span>
               </div>
-              <h3 className="text-2xl font-bold text-secondary-800 mb-2">Hello!</h3>
-              <p className="text-secondary-500 max-w-sm">
-                I'm your AI assistant. Ask me to create tasks, list your pending items, or help you organize your day.
+              <h3 className="text-3xl font-extrabold text-secondary-900 dark:text-secondary-100 mb-3 tracking-tight">How can I help you today?</h3>
+              <p className="text-secondary-600 dark:text-secondary-400 max-w-sm text-lg leading-relaxed font-medium">
+                Try asking me to "Create a task for tomorrow's meeting" or "List all my priority todos".
               </p>
             </div>
           ) : (
@@ -395,26 +438,11 @@ export function ChatComponent() {
         )}
 
         {/* Input Area */}
-        <div className="p-4 bg-white/50 border-t border-secondary-100 backdrop-blur-sm space-y-3">
-          {/* Model Selector */}
-          <div className="flex items-center gap-3">
-            <label htmlFor="model-select" className="text-sm font-medium text-secondary-700">
-              Model:
-            </label>
-            <select
-              id="model-select"
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm bg-white border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-            >
-              {availableModels.map((model) => (
-                <option key={model.value} value={model.value}>
-                  {model.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="p-6 bg-white dark:bg-secondary-900 border-t border-secondary-100 dark:border-secondary-800">
           <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+          <p className="mt-3 text-[10px] text-center text-secondary-400 dark:text-secondary-500 uppercase tracking-widest font-medium">
+            Powered by Google Gemini
+          </p>
         </div>
       </Card>
     </div>

@@ -53,24 +53,23 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="relative flex items-center gap-2 group">
       <Input
         ref={inputRef}
         value={message}
         onChange={handleChange}
-        // T037: Placeholder text for task-id commands
-        placeholder="Ask me to create, list, complete, or update tasks... (e.g., 'complete task 3')"
+        placeholder="Type a message or manage tasks..."
         disabled={isLoading}
-        className="pr-12 py-6 rounded-2xl shadow-sm border-secondary-200 focus:ring-primary-500"
+        className="pr-14 py-7 rounded-[1.5rem] shadow-sm border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800/80 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent transition-all placeholder:text-secondary-400 dark:placeholder:text-secondary-500"
         maxLength={MAX_MESSAGE_LENGTH + 10} // Allow typing but show error
         error={error || undefined}
       />
-      <div className="absolute right-2">
+      <div className="absolute right-3">
         <Button
           type="submit"
           size="sm"
           disabled={!message.trim() || isLoading || !!error}
-          className="rounded-xl h-10 w-10 p-0"
+          className="rounded-2xl h-11 w-11 p-0 shadow-lg hover:shadow-primary-500/20 active:scale-95 transition-all"
         >
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />

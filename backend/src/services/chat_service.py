@@ -157,6 +157,16 @@ class ChatService:
         self._session.commit()
         self._session.refresh(user_msg)
 
+        # Auto-generate conversation title from first user message if not set
+        if not convo.title:
+            # Use first 50 characters of the first message as title
+            title = message[:50].strip()
+            if len(message) > 50:
+                title += "..."
+            convo.title = title
+            self._session.add(convo)
+            self._session.commit()
+
         history = self._load_history(conversation_id=convo.id)
         history_text = "\n".join([f"{m.role}: {m.content}" for m in history[-20:]])
 
@@ -181,6 +191,12 @@ class ChatService:
         self._session.add(assistant_msg)
         self._session.commit()
         self._session.refresh(assistant_msg)
+
+        # Update conversation timestamp
+        from datetime import datetime
+        convo.updated_at = datetime.utcnow()
+        self._session.add(convo)
+        self._session.commit()
 
         return {
             "conversation_id": convo.id,

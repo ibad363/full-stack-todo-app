@@ -23,21 +23,25 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
 
   return (
     <div className={cn(
-      "flex gap-4 p-4 rounded-2xl transition-all duration-300 animate-slide-up",
-      isUser ? "bg-white/50 ml-12" : "bg-primary-50/50 mr-12"
+      "flex gap-4 p-5 rounded-[2rem] transition-all duration-300 animate-slide-up shadow-sm border border-transparent",
+      isUser
+        ? "bg-white dark:bg-secondary-800 ml-12 border-secondary-100 dark:border-secondary-700 shadow-secondary-200/50 dark:shadow-black/20"
+        : "bg-primary-50/50 dark:bg-primary-900/20 mr-12 border-primary-100/50 dark:border-primary-900/30"
     )}>
       <div className={cn(
-        "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-sm",
-        isUser ? "bg-secondary-100 text-secondary-600" : "bg-primary-100 text-primary-600"
+        "flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm transition-transform hover:scale-105",
+        isUser
+          ? "bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-300"
+          : "bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400"
       )}>
-        {isUser ? <User size={20} /> : <Bot size={20} />}
+        {isUser ? <User size={22} /> : <Bot size={22} />}
       </div>
 
-      <div className="flex-1 space-y-2">
-        <p className="text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+      <div className="flex-1 space-y-1.5 min-w-0">
+        <p className="text-[10px] font-bold text-secondary-500 dark:text-secondary-500 uppercase tracking-[0.15em]">
           {isUser ? 'You' : 'Assistant'}
         </p>
-        <div className="prose prose-sm max-w-none text-secondary-800 whitespace-pre-wrap">
+        <div className="prose prose-sm max-w-none text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap leading-relaxed">
           {content}
         </div>
         {/* T036: Dashboard link for task-related responses */}
