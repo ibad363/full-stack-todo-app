@@ -161,6 +161,19 @@ async def add_private_network_access_header(request, call_next):
             
     return response
 
+
+@app.middleware("http")
+async def normalize_trailing_slash(request, call_next):
+    path = request.url.path
+    if path != "/" and path.endswith("/"):
+        # Strip trailing slash from path in scope
+        new_path = path.rstrip("/")
+        request.scope["path"] = new_path
+        if "raw_path" in request.scope:
+            request.scope["raw_path"] = new_path.encode("ascii")
+
+    return await call_next(request)
+
 # Include routers
 app.include_router(auth.router)
 app.include_router(tasks.router)
