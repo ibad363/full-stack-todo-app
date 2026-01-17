@@ -5,6 +5,7 @@ import { ChatComponent } from './ChatComponent';
 import { Navbar } from '@/components/dashboard/Navbar';
 
 export default function ChatPage() {
+  console.log('Rendering ChatPage component');
   return (
     <div className="min-h-screen bg-gradient-primary">
       <Navbar />
