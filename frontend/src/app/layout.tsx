@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/ui/ThemeContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Todo App",
+  title: "Aura Task",
   description: "Multi-user task management application",
   icons: {
     icon: "/favicon.svg",
